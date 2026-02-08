@@ -1,0 +1,96 @@
+# 🚀 Analisador Léxico para a Linguagem "lang" 🚀
+
+Este projeto implementa um analisador léxico para a linguagem "lang". Ele utiliza **JFlex** para gerar o analisador a partir de especificações léxicas descritas em um arquivo `.flex`. O analisador reconhece tokens que representam operadores, identificadores, números, palavras-chave e outros elementos da linguagem.
+
+---
+
+
+## 👩🏽‍💻 **Autores**
+
+- **Deborah Caroline Rodrigues Oliveira - 17.1.8231**    
+
+- **Thuane de Souza Espírito Santo - 17.1.8255**  
+
+---
+
+## Introdução
+
+O **Lang_TP2** é um projeto de implementação de uma linguagem específica utilizando técnicas de análise léxica e sintática. O projeto é estruturado para suportar a interpretação da linguagem definida e contém arquivos responsáveis pelo parsing, interpretação e execução dos comandos da linguagem.
+
+## Estrutura de Diretórios
+
+A estrutura do projeto está organizada da seguinte forma:
+
+```
+Lang_TP2/
+├── exemplos/                      # Contém exemplos de códigos na linguagem implementada
+├── lang/
+│   ├── ast/                        # Representação da Árvore Sintática Abstrata (AST)
+│   │   ├── command/                # Comandos da linguagem
+│   │   ├── decl/                   # Declarações da linguagem
+│   │   ├── environment/            # Ambiente de execução
+│   │   ├── expr/                   # Expressões da linguagem
+│   │   ├── types/                  # Tipos da linguagem
+│   ├── visitors/                   # Classes para visitação da AST
+│   │   ├── Interp.java             # Interpretador da linguagem
+│   │   ├── Node.java               # Nó base da AST
+│   │   ├── NodeVisitor.java        # Interface para visitação de nós da AST
+│   │   ├── Program.java            # Representação do programa principal
+│   ├── parser/                     # Arquivos responsáveis pelo parsing
+│   │   ├── lang.cup                # Arquivo do CUP para análise sintática
+│   │   ├── lang.flex               # Arquivo do JFlex para análise léxica
+├── Makefile                         # Script de automação de compilação
+├── langc.sh                         # Script de execução do interpretador
+```
+
+## Compilação e Execução
+
+### 1. Compilar o projeto
+
+Para compilar o projeto, utilize o comando:
+```sh
+make
+```
+Isso irá processar os arquivos `.flex` e `.cup`, gerar os analisadores e compilar o código-fonte.
+
+### 2. Executar um programa na linguagem
+
+Após a compilação, o interpretador pode ser executado com o comando:
+```sh
+./langc.sh -i exemplos/teste.txt
+```
+Onde `teste.txt` contém um código de exemplo na linguagem implementada.
+
+### 3. Limpar arquivos temporários
+
+Para remover arquivos temporários gerados durante a compilação, utilize:
+```sh
+make clear
+```
+
+## Dependências
+
+Antes de compilar e executar o projeto, certifique-se de ter as seguintes dependências instaladas:
+
+- `make` - Utilizado para automatizar a compilação.
+- `javac` - Compilador Java.
+- `cup` - Ferramenta para geração do analisador sintático.
+- `jflex` - Ferramenta para geração do analisador léxico.
+
+Caso alguma dessas dependências não esteja instalada, utilize o gerenciador de pacotes do seu sistema para instalá-las.
+
+## Sobre a Linguagem Implementada
+
+O projeto implementa uma linguagem de domínio específico (DSL) que possui suporte a:
+
+- Definição de variáveis e tipos
+- Operações aritméticas e lógicas
+- Comandos de controle de fluxo (`if`, `while`, `for`, etc.)
+- Funções e escopo de variáveis
+
+A gramática da linguagem está definida nos arquivos `lang.cup` e `lang.flex`.
+
+
+
+
+
