@@ -1,9 +1,0 @@
-main(){
-   x = 10;
-   iterate(i : x + 2){
-       print i;
-       print ' ';
-   }
-   print '.';
-   print '\n';
-}
