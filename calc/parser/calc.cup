@@ -1,0 +1,106 @@
+/* Simple +/-/* expression language; parser evaluates constant expressions on the fly*/
+
+package calc.parser;
+
+import java_cup.runtime.*;
+import calc.nodes.*;
+import calc.nodes.decl.*;
+import calc.nodes.command.*;
+import calc.nodes.expr.*;
+import calc.nodes.types.*;
+import java.util.ArrayList;
+
+
+class CalcParser;
+parser code {:
+    // Connect this parser to a scanner!
+    private CalcLexer s;
+    public CalcParser(CalcLexer s){ this.s=s; }
+    private Boolean error;
+    // Get the line
+    public void report_error(String message, Object info){
+          Symbol s = (Symbol) info;
+          System.err.println(message + " at input " + cur_token.left + ", " + cur_token.right + ": near " + CalcParserSym.terminalNames[s.sym]);
+          System.err.print("Expected symbols: ");
+          int counter = 10;
+          for(Integer i : expected_token_ids()){
+              if(counter <= 0){
+                 System.err.println(CalcParserSym.terminalNames[i] + " " );
+                 counter = 11;
+              }else{
+                 System.err.print(CalcParserSym.terminalNames[i] + " ");
+              }
+              counter --;
+          }
+          System.err.println(" ");
+          System.err.flush();
+    }
+
+    public void report_fatal_error(String message, Object info) throws java.lang.Exception {
+          done_parsing();
+          // report_error(message, info);
+          throw new Exception("Can't recover from previous error(s)");
+    }
+
+    public void unrecovered_syntax_error(Symbol cur_token) throws java.lang.Exception {
+          report_fatal_error("Couldn't repair and continue parse", cur_token);
+    }
+
+    public void syntax_error(Symbol cur_token){
+           error = true;
+           report_error("Syntax error ", cur_token );
+
+    }
+
+    boolean hasError(){ return error; }
+:}
+
+init with {:               :};
+scan with {: return s.nextToken(); :};
+
+/* define how to connect to the scanner! */
+
+/*
+   Terminais
+*/
+terminal            SEMI, PLUS, MINUS, TIMES, DIV, LP, RP, ATTR, INTER, OSB, CSB,
+                    OB, CB, COLON, COMA, TYINT, TYFLOAT, TYBOOL, RETURN, PRINT, LTE, LT, EQ;
+terminal Integer    NUMBER;        // our scanner provides numbers as integers
+terminal Float      FLOAT;
+terminal Boolean    TRUE,FALSE;
+terminal String     ID;
+
+/* Non terminals */
+non terminal Exp        expr;      // used to store evaluated subexpressions
+/*
+  Precencia e associatividade dos operadores.
+  Lista em ordem dos de menor prioridade para os de maior
+  prioridade.
+*/
+
+/* The grammar rules */
+
+expr  ::= expr:e1 PLUS:t expr:e2      {: RESULT = new Plus(tleft,tright,e1,e2);   :}
+       | expr:e1 MINUS:t expr:e2      {: RESULT = new Sub(tleft,tright,e1,e2);    :}
+       | NUMBER:n	                  {: RESULT = new IntLit(nleft,nright,n);     :}
+       | FLOAT:n	                  {: RESULT = new FloatLit(nleft,nright,n);   :}
+       | TRUE:n	                      {: RESULT = new BoolLit(nleft,nright,n);    :}
+       | ID:v                         {: RESULT = new Var(vleft,vright,v);        :}
+       ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

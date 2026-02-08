@@ -1,0 +1,55 @@
+singlet(valor) ::= "<valor>"
+simpleType(ty) ::= "<ty>"
+
+binop(expe, expd, op) ::= "<expe> <op>  <expd>"
+
+attr(lval,exp) ::= <<<lval> = <exp>;>>
+
+fcall(fname, args) ::= <<<fname>(<args; separator=",">)>>
+
+seq(lft, rht) ::= <<
+<lft>
+<rht>
+>>
+
+if(e,thn,els) ::=
+<<if(<e>){
+    <thn>
+}<if(els)> else{
+   <els>
+}
+<endif>
+>>
+
+loop(e,body) ::=
+<<while(<e>){
+    <body>
+}>>
+
+returnCMD(e) ::= <<return <e>;>>
+
+printIBCMD(e) ::= <<printf("%i\n", <e>);>>
+printFloatCMD(e) ::= <<printf("%f", <e>);>>
+
+bind(var,type) ::= << <type> <var> >>
+
+func(id,param,ret,decl,body) ::=  <<
+<ret> <id>(<param; separator=",">){
+     <decl>
+     <body>
+}
+>>
+
+decl(v,t) ::= <<<t> <v>;
+
+>>
+
+program(flist) ::= <<
+#include \<stdio.h\>
+
+<flist;separator="\n">
+
+int main(){
+   inicio();
+   return 0;
+}>>

@@ -1,0 +1,46 @@
+-- Computa n elevado a e, desde e seja inteiro positivo
+powi(Int : n, Int : e) : Int{
+    ?(e <= 0 ){ @1; }
+    @n*powi(n,e-1);
+}
+
+-- Computa n elevado a e, desde e seja inteiro positivo
+powf(Float : n, Int : e) : Float{
+    ?(e <= 0 ){ @1.0; }
+    @n * powf(n,e-1);
+}
+
+
+-- Não é assim que se deve converter inteiro em float !;
+nattofloat(Int : i): Float{
+   f = 0.0;
+   ?[0 < i]{
+      ?(1000 < i){i = i - 1000; f = f + 1000.0;}
+      ?(100 < i){i = i - 100; f = f + 100.0;}
+      ?(10 < i){i = i - 10; f = f + 10.0;}
+      ?(i <= 10){f = f + 1.0; i = i-1;}
+   }
+   @f;
+}
+
+
+-- Computa a i-ésima raiz de n usando método de Newton
+-- com no máximo K interações
+root(Float : n, Int: i, Int: k) : Float{
+    xk = n/2.0;
+    ?(i == 1){ @n;}
+    ?[0 < k]{
+        xk = (nattofloat(i-1)*xk + n/powf(xk,i-1))/nattofloat(i);
+        k = k - 1;
+    }
+    @xk;
+}
+
+sqrt(Float : n):Float { @ root(n,2,15);}
+
+
+inicio() : Int{
+  r = sqrt(5.0);
+  # r;
+  @0;
+}

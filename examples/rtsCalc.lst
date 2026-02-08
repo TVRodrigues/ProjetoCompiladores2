@@ -1,0 +1,116 @@
+     1                                  section .data
+     2 00000000 0A726573756C746164-         msg1 : db 0xA,'resultado: '
+     2 00000009 6F3A20             
+     3                                      strLen : equ $-msg1
+     4 0000000C 2D2D2D2D2D2D20656E-         msg2 : db '------ end-of-program ----- ',0xA
+     4 00000015 642D6F662D70726F67-
+     4 0000001E 72616D202D2D2D2D2D-
+     4 00000027 200A               
+     5                                      strLen2 : equ $-msg2
+     6 00000029 79E9F642                    float_sample: dd 123.456
+     7                                  
+     8                                  segment .bss
+     9 00000000 <res 100h>                  _outbuff: resb 256
+    10 00000100 ????????????????            _outsz: resq 1
+    11 00000108 ????????????????            _outstart: resq 1
+    12                                  
+    13 00000110 <res 100h>                  _inbuff: resb 256
+    14 00000210 ????????????????            _insz:  resq 1
+    15 00000218 ????????????????            _instart:  resq 1
+    16                                  
+    17                                  section .text
+    18                                  
+    19                                  global _start ; O símbolo _start é exportado para uso externo.
+    20                                                ; O sistema operacional Linux espera símbolo em um programa executável.
+    21                                  
+    22                                  _start:
+    23 00000000 4889E5                      mov rbp, rsp ; Salvando a base da pilha.
+    24                                     ; mov rax, [float_sample]
+    25                                     ; mov rbx, 6
+    26                                  
+    27 00000003 B87B000000                  mov rax, 123
+    28 00000008 E827000000                  call _printInt
+    29                                  
+    30 0000000D B801000000                  mov rax, 1        ; 4 Código para operação de escrita
+    31 00000012 BF01000000                  mov rdi, 1        ; Hanlder de escrita (1 = stdout)
+    32 00000017 48BE-                       mov rsi, msg2     ; Endereço da mensagem
+    32 00000019 [0C00000000000000] 
+    33 00000021 BA1D000000                  mov rdx, strLen2  ; Comprimento da saída
+    34 00000026 0F05                        syscall           ; Chamada ao kernel (64 bits, int 0x80  para 32 bits )
+    35                                  
+    36 00000028 B83C000000                  mov rax, 60      ; Código de chamada 60 = EXIT
+    37 0000002D BF00000000                  mov rdi, 0       ;
+    38 00000032 0F05                        syscall         ; chamada ao kernel
+    39                                  
+    40                                  
+    41                                  
+    42                                  
+    43                                  
+    44                                  
+    45                                  ; Converte um inteiro em String e o imprime para a saída padrão.
+    46                                  ; eax contém o valor a ser impresso.
+    47                                  ; usa esi, ebx, ecx, edx,
+    48                                  ; sobrescreve eax,
+    49                                  ; Não salva registradores.
+    50                                  _printInt:
+    51 00000034 55                          push rbp     ; Salvando a base da pilha;
+    52 00000035 4889E5                      mov rbp, rsp ; atualizamos o topo;
+    53                                  
+    54 00000038 48BE-                       mov rsi, _outbuff          ; esi aponta para o buffer de saida
+    54 0000003A [0000000000000000] 
+    55 00000042 4881C6FF000000              add rsi, 255               ; Vamos ao final do buffer !
+    56 00000049 C6060A                      mov [rsi], BYTE 10  ; \n  ; No final do buffer inserimos uma quebra de linha.
+    57 0000004C 48FFCE                      dec rsi                   ; esi --
+    58                                  
+    59 0000004F E861000000                  call _intToStr
+    60                                  
+    61 00000054 48BB-                       mov rbx, _outbuff
+    61 00000056 [0000000000000000] 
+    62 0000005E 4881C3FF000000              add rbx, 255
+    63 00000065 4829C3                      sub rbx, rax
+    64 00000068 48891C25[08010000]          mov [_outstart], rbx
+    65 00000070 4883C001                    add rax,1
+    66 00000074 48890425[00010000]          mov [_outsz], rax
+    67                                  
+    68                                  
+    69 0000007C B801000000                  mov rax, 1        ; 1 Código para operação de escrita
+    70 00000081 BF01000000                  mov rdi, 1        ; Hanlder de escrita (1 = stdout)
+    71 00000086 48BE-                       mov rsi, msg1     ; Endereço da mensagem
+    71 00000088 [0000000000000000] 
+    72 00000090 BA0C000000                  mov rdx, strLen  ; Comprimento da saída
+    73 00000095 0F05                        syscall           ; Chamada ao kernel (64 bits, int 0x80  para 32 bits )
+    74                                  
+    75 00000097 B801000000                  mov rax, 1           ; 1 Código para operação de escrita
+    76 0000009C BF01000000                  mov rdi, 1           ; Hanlder de escrita (1 = stdout)
+    77 000000A1 488B3425[08010000]          mov rsi, [_outstart] ; Endereço da mensagem
+    78 000000A9 488B1425[00010000]          mov rdx, [_outsz]    ; Comprimento da saída
+    79 000000B1 0F05                        syscall              ; Chamada ao kernel (64 bits, int 0x80  para 32 bits )
+    80                                  
+    81 000000B3 5D                          pop rbp      ;
+    82 000000B4 C3                          ret           ; retornado da função;
+    83                                  
+    84                                  
+    85                                    ; Converte um inteiro em string
+    86                                    ; rax valor p/ converter
+    87                                    ; rsi ponteiro o fim do buffer onde escrever a string
+    88                                    ; deixa em rax, o número de bytes escritos.
+    89                                    ; usa rcx, rbx não salva registradores.
+    90                                  _intToStr:
+    91 000000B5 4889F3                      mov rbx, rsi              ; copia o end do fim do buffer
+    92 000000B8 B90A000000                  mov rcx, 10               ; base da conversao
+    93                                  _tostr:
+    94 000000BD BA00000000                  mov rdx,0                 ; edx  (a parte mais alta )
+    95 000000C2 48F7F9                      idiv rcx                  ; divide edx:eax por ecx
+    96 000000C5 80C230                      add dl, 48                ; 48 é código ascii para '0'
+    97 000000C8 8816                        mov [rsi], dl;            ; colocamos o carácter obtido em dl no valor apontado por ebx
+    98 000000CA 48FFCE                      dec rsi                   ; esi --
+    99 000000CD 4883F800                    cmp rax,0                 ;
+   100 000000D1 75EA                        jnz _tostr              ; Se eax > 0; volte e conte outra vez !!!
+   101                                  
+   102 000000D3 48FFC6                      inc rsi           ; Calcula o início do número e seu comprimento na string de saída.
+   103 000000D6 4829F3                      sub rbx, rsi
+   104 000000D9 4889D8                      mov rax, rbx
+   105 000000DC 4883C001                    add rax, 1
+   106 000000E0 C3                          ret
+   107                                  
+   108                                  
