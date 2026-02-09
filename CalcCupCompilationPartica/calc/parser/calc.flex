@@ -1,6 +1,3 @@
-/* 14/11/2024 - Lang2 lexer
- * Thiago V. Rodrigues
- */
 package calc.parser;
 
 import java_cup.runtime.Symbol;
@@ -15,30 +12,23 @@ import java_cup.runtime.Symbol;
 %column
 %unicode
 
-/* tratamento do fim de arquivo */
 %eofval{
    return new Symbol(Lang2ParserSym.EOF, yyline + 1, yycolumn + 1);
 %eofval}
 
 %{
-    /* Conversor de números e tratamento de erros */
     private int toInt(String s){
        try{ return Integer.parseInt(s); } catch(Exception e){ return 0; }
     }
     private float toFloat(String s){
        try{ return Float.parseFloat(s); } catch(Exception e){ return 0; }
     }
-    private String toCharContent(String s){
-       return s.substring(1, s.length()-1);
-    }
 %}
 
-/* --- Definições Regulares (Baseadas no Lang2) --- */
 white       = [ \t\r\n]+
 lineComment = "--" [^\r\n]*
 blockComment= "{-" ~"-}"
 
-/* Identificadores Lang2 */
 digit = [0-9]
 lower = [a-z]
 upper = [A-Z]
@@ -46,23 +36,19 @@ alpha = [a-zA-Z_]
 id    = {lower}({alpha}|{digit})*
 tyid  = {upper}({alpha}|{digit})*
 
-/* Literais Numéricos */
 int   = {digit}+
 float = {digit}+"."{digit}+
 
-/* Literal Char */
 char_content = [^\\\'\r\n] | "\\" [ntbr\\\'\"] | "\\" [0-9]{3}
 char_lit     = "'" {char_content} "'"
 
 %%
 
 <YYINITIAL>{
-    /* Ignorar Espaços e Comentários */
     {white}         { /* Ignora */ }
     {lineComment}   { /* Ignora */ }
     {blockComment}  { /* Ignora */ }
 
-    /* Palavras Reservadas */
     "data"      { return new Symbol(Lang2ParserSym.DATA, yyline+1, yycolumn+1); }
     "iterate"   { return new Symbol(Lang2ParserSym.ITERATE, yyline+1, yycolumn+1); }
     "if"        { return new Symbol(Lang2ParserSym.IF, yyline+1, yycolumn+1); }
@@ -73,18 +59,15 @@ char_lit     = "'" {char_content} "'"
     "read"      { return new Symbol(Lang2ParserSym.READ, yyline+1, yycolumn+1); }
     "null"      { return new Symbol(Lang2ParserSym.NULL, yyline+1, yycolumn+1); }
     
-    /* Tipos Primitivos */
     "Int"       { return new Symbol(Lang2ParserSym.TYINT, yyline+1, yycolumn+1); }
     "Char"      { return new Symbol(Lang2ParserSym.TYCHAR, yyline+1, yycolumn+1); }
     "Bool"      { return new Symbol(Lang2ParserSym.TYBOOL, yyline+1, yycolumn+1); }
     "Float"     { return new Symbol(Lang2ParserSym.TYFLOAT, yyline+1, yycolumn+1); }
     "Void"      { return new Symbol(Lang2ParserSym.VOID, yyline+1, yycolumn+1); }
 
-    /* Literais Booleanos */
     "true"      { return new Symbol(Lang2ParserSym.TRUE, yyline+1, yycolumn+1, true); }
     "false"     { return new Symbol(Lang2ParserSym.FALSE, yyline+1, yycolumn+1, false); }
 
-    /* Operadores e Pontuação */
     "("         { return new Symbol(Lang2ParserSym.LPAREN, yyline+1, yycolumn+1); }
     ")"         { return new Symbol(Lang2ParserSym.RPAREN, yyline+1, yycolumn+1); }
     "["         { return new Symbol(Lang2ParserSym.LBRACKET, yyline+1, yycolumn+1); }
@@ -102,6 +85,8 @@ char_lit     = "'" {char_content} "'"
     "&"         { return new Symbol(Lang2ParserSym.TYPE_AND, yyline+1, yycolumn+1); }
     "!"         { return new Symbol(Lang2ParserSym.NOT, yyline+1, yycolumn+1); }
     "<"         { return new Symbol(Lang2ParserSym.LT, yyline+1, yycolumn+1); }
+    /* CORREÇÃO: GT adicionado */
+    ">"         { return new Symbol(Lang2ParserSym.GT, yyline+1, yycolumn+1); }
     "=="        { return new Symbol(Lang2ParserSym.EQ, yyline+1, yycolumn+1); }
     "!="        { return new Symbol(Lang2ParserSym.NEQ, yyline+1, yycolumn+1); }
     "+"         { return new Symbol(Lang2ParserSym.PLUS, yyline+1, yycolumn+1); }
@@ -110,13 +95,11 @@ char_lit     = "'" {char_content} "'"
     "/"         { return new Symbol(Lang2ParserSym.DIV, yyline+1, yycolumn+1); }
     "%"         { return new Symbol(Lang2ParserSym.MOD, yyline+1, yycolumn+1); }
 
-    /* Identificadores e Valores */
     {tyid}      { return new Symbol(Lang2ParserSym.TYID, yyline+1, yycolumn+1, yytext()); }
     {id}        { return new Symbol(Lang2ParserSym.ID, yyline+1, yycolumn+1, yytext()); }
     {int}       { return new Symbol(Lang2ParserSym.INT_LIT, yyline+1, yycolumn+1, toInt(yytext())); }
     {float}     { return new Symbol(Lang2ParserSym.FLOAT_LIT, yyline+1, yycolumn+1, toFloat(yytext())); }
     {char_lit}  { return new Symbol(Lang2ParserSym.CHAR_LIT, yyline+1, yycolumn+1, yytext()); }
     
-    /* Erro Léxico */
     .           { throw new Error("Caractere ilegal <" + yytext() + "> na linha " + yyline); }
 }

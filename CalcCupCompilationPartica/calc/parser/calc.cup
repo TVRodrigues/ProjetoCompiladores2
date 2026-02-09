@@ -2,8 +2,8 @@ package calc.parser;
 
 import java_cup.runtime.*;
 import calc.nodes.*;
+import java.util.ArrayList;
 
-/* Configuração do Parser*/
 parser code {:
     private CalcLexer s;
     
@@ -11,40 +11,159 @@ parser code {:
         this.s=s; 
     }
     
-    /* Método para reportar erro */
     public void syntax_error(Symbol s){ 
-        System.out.println("Erro de sintaxe (linha " + s.left + ", coluna " + s.right + "): " + s.value); 
+        System.out.println("Erro de sintaxe (linha " + s.left + ", coluna " + s.right + "): Token inesperado '" + (s.value == null ? s.sym : s.value) + "'"); 
+    }
+    
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception {
+        throw new Exception("Erro sintático irrecuperável");
     }
 :}
 
-/* Conecta com o Lexer */
 scan with {: return s.nextToken(); :};
 
-/* Palavras reservadas */
+/* --- TERMINAIS --- */
 terminal DATA, ITERATE, IF, ELSE, RETURN, NEW, PRINT, READ, NULL;
 terminal VOID;
-
-/* Tipos primitivos */
 terminal TYINT, TYCHAR, TYBOOL, TYFLOAT;
-
-/* Literais */
-terminal TRUE, FALSE;
+terminal Boolean TRUE, FALSE;
 terminal Integer INT_LIT;
 terminal Float FLOAT_LIT;
 terminal String CHAR_LIT;
 terminal String ID, TYID;
 
-/* Símbolos e Operadores */
 terminal LPAREN, RPAREN, LBRACKET, RBRACKET, LBRACE, RBRACE;
 terminal COMMA, SEMI, COLON, DOT, DCOLON, ARROW;
-terminal ASSIGN, AND, TYPE_AND, NOT, LT, EQ, NEQ;
+/* CORREÇÃO: GT adicionado aqui */
+terminal ASSIGN, AND, TYPE_AND, NOT, LT, GT, EQ, NEQ;
 terminal PLUS, MINUS, TIMES, DIV, MOD;
 
-/* Variáveis */
+/* --- NÃO TERMINAIS --- */
 non terminal prog;
+non terminal decl_list, decl;
+non terminal data_decl, func_decl;
+non terminal bind_list, bind;
+non terminal param_list; 
+non terminal type_annot, ty_join;
+non terminal type, basic_type;
+non terminal block;
+non terminal cmd_list, cmd;
+non terminal expr, loop_cond;
+non terminal expr_list_ne;
+non terminal lvalue;
 
-/* GRAMÁTICA INICIAL */
+/* --- PRECEDÊNCIA --- */
+precedence left AND;
+precedence nonassoc EQ, NEQ, LT, GT; /* GT adicionado na precedência também */
+precedence left PLUS, MINUS;
+precedence left TIMES, DIV, MOD;
+precedence right NOT;
+precedence left DOT, LBRACKET, LPAREN; 
+precedence nonassoc IF, ELSE; 
+
+/* --- GRAMÁTICA --- */
+
 start with prog;
 
-prog ::= /* vazio: aceita arquivo em branco ou rejeita qualquer coisa por enquanto */
+prog ::= decl_list
+       | /* vazio */
+       ;
+
+decl_list ::= decl decl_list
+            | decl
+            ;
+
+decl ::= data_decl
+       | func_decl
+       ;
+
+data_decl ::= DATA TYID LBRACE bind_list RBRACE
+            ;
+
+bind_list ::= bind bind_list
+            | /* vazio */
+            ;
+
+bind ::= ID COLON type SEMI
+       ;
+
+func_decl ::= ID param_list DCOLON type_annot block
+            ;
+
+param_list ::= param_list ID
+             | /* vazio */
+             ;
+
+type_annot ::= type ARROW type_annot
+             | ty_join
+             ;
+
+ty_join ::= type TYPE_AND ty_join
+          | type
+          ;
+
+type ::= basic_type LBRACKET RBRACKET
+       | basic_type
+       ;
+
+basic_type ::= TYINT | TYCHAR | TYBOOL | TYFLOAT | VOID | TYID ;
+
+block ::= LBRACE cmd_list RBRACE 
+        ;
+
+cmd_list ::= cmd cmd_list
+           | /* vazio */
+           ;
+
+cmd ::= IF LPAREN expr RPAREN cmd
+      | IF LPAREN expr RPAREN cmd ELSE cmd
+      | ITERATE LPAREN loop_cond RPAREN cmd
+      | READ LPAREN RPAREN LT lvalue GT SEMI
+      | PRINT LPAREN expr RPAREN SEMI
+      | READ lvalue SEMI
+      | RETURN expr_list_ne SEMI
+      | RETURN SEMI
+      | lvalue ASSIGN expr SEMI
+      | expr SEMI
+      | block
+      | SEMI
       ;
+
+loop_cond ::= ID COLON expr
+            | expr
+            ;
+
+expr ::= expr PLUS expr
+       | expr MINUS expr
+       | expr TIMES expr
+       | expr DIV expr
+       | expr MOD expr
+       | expr AND expr
+       | expr EQ expr
+       | expr NEQ expr
+       | expr LT expr
+       | NOT expr
+       | LPAREN expr RPAREN
+       | NEW type
+       | NEW type LBRACKET expr RBRACKET
+       | NULL
+       | INT_LIT
+       | FLOAT_LIT
+       | CHAR_LIT
+       | TRUE
+       | FALSE
+       | lvalue
+       | ID LPAREN expr_list_ne RPAREN
+       | ID LPAREN RPAREN
+       ;
+
+expr_list_ne ::= expr COMMA expr_list_ne
+               | expr
+               ;
+
+lvalue ::= ID
+         | lvalue LBRACKET expr RBRACKET
+         | lvalue DOT ID
+         | ID LPAREN expr_list_ne RPAREN LBRACKET expr RBRACKET
+         | ID LPAREN RPAREN LBRACKET expr RBRACKET
+         ;

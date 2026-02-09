@@ -14,7 +14,7 @@ public class Lang2ParserSym {
   public static final int TYCHAR = 13;
   public static final int LPAREN = 23;
   public static final int SEMI = 30;
-  public static final int MINUS = 43;
+  public static final int MINUS = 44;
   public static final int RPAREN = 24;
   public static final int DATA = 2;
   public static final int NOT = 38;
@@ -22,8 +22,8 @@ public class Lang2ParserSym {
   public static final int LT = 39;
   public static final int TYBOOL = 14;
   public static final int COMMA = 29;
-  public static final int DIV = 45;
-  public static final int PLUS = 42;
+  public static final int DIV = 46;
+  public static final int PLUS = 43;
   public static final int ASSIGN = 35;
   public static final int IF = 4;
   public static final int DOT = 32;
@@ -36,13 +36,13 @@ public class Lang2ParserSym {
   public static final int NEW = 7;
   public static final int error = 1;
   public static final int NULL = 10;
-  public static final int MOD = 46;
-  public static final int NEQ = 41;
+  public static final int MOD = 47;
+  public static final int NEQ = 42;
   public static final int VOID = 11;
-  public static final int EQ = 40;
+  public static final int EQ = 41;
   public static final int TYID = 22;
   public static final int ITERATE = 3;
-  public static final int TIMES = 44;
+  public static final int TIMES = 45;
   public static final int ARROW = 34;
   public static final int COLON = 31;
   public static final int LBRACE = 27;
@@ -53,6 +53,7 @@ public class Lang2ParserSym {
   public static final int RBRACE = 28;
   public static final int FALSE = 17;
   public static final int TYFLOAT = 15;
+  public static final int GT = 40;
   public static final int INT_LIT = 18;
   public static final int PRINT = 8;
   public static final String[] terminalNames = new String[] {
@@ -96,6 +97,7 @@ public class Lang2ParserSym {
   "TYPE_AND",
   "NOT",
   "LT",
+  "GT",
   "EQ",
   "NEQ",
   "PLUS",
