@@ -1,6 +1,6 @@
 import java.io.*;
 import calc.parser.CalcLexer;
-import calc.parser.CalcParser;
+import calc.parser.Lang2Parser;
 import java_cup.runtime.Symbol;
 
 public class Lang2Compiler {

@@ -12,22 +12,22 @@ import java_cup.runtime.XMLElement;
 /** CUP v0.11b 20160615 (GIT 4ac7450) generated parser.
   */
 @SuppressWarnings({"rawtypes"})
-public class parser extends java_cup.runtime.lr_parser {
+public class Lang2Parser extends java_cup.runtime.lr_parser {
 
  public final Class getSymbolContainer() {
-    return sym.class;
+    return Lang2ParserSym.class;
 }
 
   /** Default constructor. */
   @Deprecated
-  public parser() {super();}
+  public Lang2Parser() {super();}
 
   /** Constructor which sets the default scanner. */
   @Deprecated
-  public parser(java_cup.runtime.Scanner s) {super(s);}
+  public Lang2Parser(java_cup.runtime.Scanner s) {super(s);}
 
   /** Constructor which sets the default scanner. */
-  public parser(java_cup.runtime.Scanner s, java_cup.runtime.SymbolFactory sf) {super(s,sf);}
+  public Lang2Parser(java_cup.runtime.Scanner s, java_cup.runtime.SymbolFactory sf) {super(s,sf);}
 
   /** Production table. */
   protected static final short _production_table[][] = 
@@ -56,12 +56,12 @@ public class parser extends java_cup.runtime.lr_parser {
   public short[][] reduce_table() {return _reduce_table;}
 
   /** Instance of action encapsulation class. */
-  protected CUP$parser$actions action_obj;
+  protected CUP$Lang2Parser$actions action_obj;
 
   /** Action encapsulation object initializer. */
   protected void init_actions()
     {
-      action_obj = new CUP$parser$actions(this);
+      action_obj = new CUP$Lang2Parser$actions(this);
     }
 
   /** Invoke a user supplied parse action. */
@@ -73,7 +73,7 @@ public class parser extends java_cup.runtime.lr_parser {
     throws java.lang.Exception
   {
     /* call code in generated class */
-    return action_obj.CUP$parser$do_action(act_num, parser, stack, top);
+    return action_obj.CUP$Lang2Parser$do_action(act_num, parser, stack, top);
   }
 
   /** Indicates start state. */
@@ -110,72 +110,72 @@ public class parser extends java_cup.runtime.lr_parser {
 
 /** Cup generated class to encapsulate user supplied action code.*/
 @SuppressWarnings({"rawtypes", "unchecked", "unused"})
-class CUP$parser$actions {
-  private final parser parser;
+class CUP$Lang2Parser$actions {
+  private final Lang2Parser parser;
 
   /** Constructor */
-  CUP$parser$actions(parser parser) {
+  CUP$Lang2Parser$actions(Lang2Parser parser) {
     this.parser = parser;
   }
 
   /** Method 0 with the actual generated action code for actions 0 to 300. */
-  public final java_cup.runtime.Symbol CUP$parser$do_action_part00000000(
-    int                        CUP$parser$act_num,
-    java_cup.runtime.lr_parser CUP$parser$parser,
-    java.util.Stack            CUP$parser$stack,
-    int                        CUP$parser$top)
+  public final java_cup.runtime.Symbol CUP$Lang2Parser$do_action_part00000000(
+    int                        CUP$Lang2Parser$act_num,
+    java_cup.runtime.lr_parser CUP$Lang2Parser$parser,
+    java.util.Stack            CUP$Lang2Parser$stack,
+    int                        CUP$Lang2Parser$top)
     throws java.lang.Exception
     {
       /* Symbol object for return from actions */
-      java_cup.runtime.Symbol CUP$parser$result;
+      java_cup.runtime.Symbol CUP$Lang2Parser$result;
 
       /* select the action based on the action number */
-      switch (CUP$parser$act_num)
+      switch (CUP$Lang2Parser$act_num)
         {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 0: // $START ::= prog EOF 
             {
               Object RESULT =null;
-		int start_valleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
-		int start_valright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
-		Object start_val = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		int start_valleft = ((java_cup.runtime.Symbol)CUP$Lang2Parser$stack.elementAt(CUP$Lang2Parser$top-1)).left;
+		int start_valright = ((java_cup.runtime.Symbol)CUP$Lang2Parser$stack.elementAt(CUP$Lang2Parser$top-1)).right;
+		Object start_val = (Object)((java_cup.runtime.Symbol) CUP$Lang2Parser$stack.elementAt(CUP$Lang2Parser$top-1)).value;
 		RESULT = start_val;
-              CUP$parser$result = parser.getSymbolFactory().newSymbol("$START",0, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+              CUP$Lang2Parser$result = parser.getSymbolFactory().newSymbol("$START",0, ((java_cup.runtime.Symbol)CUP$Lang2Parser$stack.elementAt(CUP$Lang2Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Lang2Parser$stack.peek()), RESULT);
             }
           /* ACCEPT */
-          CUP$parser$parser.done_parsing();
-          return CUP$parser$result;
+          CUP$Lang2Parser$parser.done_parsing();
+          return CUP$Lang2Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 1: // prog ::= 
             {
               Object RESULT =null;
 
-              CUP$parser$result = parser.getSymbolFactory().newSymbol("prog",0, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+              CUP$Lang2Parser$result = parser.getSymbolFactory().newSymbol("prog",0, ((java_cup.runtime.Symbol)CUP$Lang2Parser$stack.peek()), RESULT);
             }
-          return CUP$parser$result;
+          return CUP$Lang2Parser$result;
 
           /* . . . . . .*/
           default:
             throw new Exception(
-               "Invalid action number "+CUP$parser$act_num+"found in internal parse table");
+               "Invalid action number "+CUP$Lang2Parser$act_num+"found in internal parse table");
 
         }
     } /* end of method */
 
   /** Method splitting the generated action code into several parts. */
-  public final java_cup.runtime.Symbol CUP$parser$do_action(
-    int                        CUP$parser$act_num,
-    java_cup.runtime.lr_parser CUP$parser$parser,
-    java.util.Stack            CUP$parser$stack,
-    int                        CUP$parser$top)
+  public final java_cup.runtime.Symbol CUP$Lang2Parser$do_action(
+    int                        CUP$Lang2Parser$act_num,
+    java_cup.runtime.lr_parser CUP$Lang2Parser$parser,
+    java.util.Stack            CUP$Lang2Parser$stack,
+    int                        CUP$Lang2Parser$top)
     throws java.lang.Exception
     {
-              return CUP$parser$do_action_part00000000(
-                               CUP$parser$act_num,
-                               CUP$parser$parser,
-                               CUP$parser$stack,
-                               CUP$parser$top);
+              return CUP$Lang2Parser$do_action_part00000000(
+                               CUP$Lang2Parser$act_num,
+                               CUP$Lang2Parser$parser,
+                               CUP$Lang2Parser$stack,
+                               CUP$Lang2Parser$top);
     }
 }
 

@@ -6,7 +6,7 @@
 package calc.parser;
 
 /** CUP generated class containing symbol constants. */
-public class sym {
+public class Lang2ParserSym {
   /* terminals */
   public static final int FLOAT_LIT = 19;
   public static final int CHAR_LIT = 20;

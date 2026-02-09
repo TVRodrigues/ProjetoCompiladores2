@@ -45,8 +45,8 @@ CalcCupCompilationPartica/
 │   │   ├── calc.flex          # Especificação do lexer (JFlex)
 │   │   ├── calc.cup           # Gramática e ações do parser (CUP)
 │   │   ├── CalcLexer.java     # Gerado por JFlex
-│   │   ├── CalcParser.java    # Gerado por CUP
-│   │   └── CalcParserSym.java # Símbolos/terminais (gerado por CUP)
+│   │   ├── Lang2Parser.java    # Gerado por CUP
+│   │   └── Lang2ParserSym.java # Símbolos/terminais (gerado por CUP)
 │   │
 │   └── nodes/                 # AST e visitantes
 │       ├── CNode.java         # Classe base de todos os nós da AST
@@ -101,7 +101,7 @@ O compilador segue um pipeline clássico de compilação, com separação entre 
 ### 4.1 Camada de análise (front-end)
 
 - **Lexer** (`calc.flex` → `CalcLexer.java`): tokenização (identificadores, números, floats, palavras-chave, operadores, comentários).
-- **Parser** (`calc.cup` → `CalcParser.java`): análise sintática LALR e construção da AST. Cada regra gramatical instancia nós concretos (`CNode`) e retorna a árvore.
+- **Parser** (`calc.cup` → `Lang2Parser.java`): análise sintática LALR e construção da AST. Cada regra gramatical instancia nós concretos (`CNode`) e retorna a árvore.
 
 ### 4.2 Camada da AST (nós)
 
