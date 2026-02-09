@@ -2,6 +2,10 @@ package calc.parser;
 
 import java_cup.runtime.*;
 import calc.nodes.*;
+import calc.nodes.decl.*;
+import calc.nodes.expr.*;
+import calc.nodes.command.*;
+import calc.nodes.types.*;
 import java.util.ArrayList;
 
 parser code {:
@@ -34,27 +38,31 @@ terminal String ID, TYID;
 
 terminal LPAREN, RPAREN, LBRACKET, RBRACKET, LBRACE, RBRACE;
 terminal COMMA, SEMI, COLON, DOT, DCOLON, ARROW;
-/* CORREÇÃO: GT adicionado aqui */
 terminal ASSIGN, AND, TYPE_AND, NOT, LT, GT, EQ, NEQ;
 terminal PLUS, MINUS, TIMES, DIV, MOD;
 
 /* --- NÃO TERMINAIS --- */
-non terminal prog;
-non terminal decl_list, decl;
-non terminal data_decl, func_decl;
-non terminal bind_list, bind;
-non terminal param_list; 
-non terminal type_annot, ty_join;
-non terminal type, basic_type;
-non terminal block;
-non terminal cmd_list, cmd;
-non terminal expr, loop_cond;
-non terminal expr_list_ne;
-non terminal lvalue;
+non terminal Program prog;
+non terminal ArrayList<CNode> decl_list;
+non terminal CNode decl;
+non terminal DataDecl data_decl;
+non terminal FunDef func_decl;
+non terminal ArrayList<Bind> bind_list;
+non terminal Bind bind;
+non terminal ArrayList<String> param_list; 
+non terminal ArrayList<CType> type_annot;
+non terminal CType ty_join;
+non terminal CType type, basic_type;
+non terminal CNode block;
+non terminal ArrayList<CNode> cmd_list;
+non terminal CNode cmd;
+non terminal Exp expr, loop_cond;
+non terminal ArrayList<Exp> expr_list_ne;
+non terminal Exp lvalue;
 
 /* --- PRECEDÊNCIA --- */
 precedence left AND;
-precedence nonassoc EQ, NEQ, LT, GT; /* GT adicionado na precedência também */
+precedence nonassoc EQ, NEQ, LT, GT;
 precedence left PLUS, MINUS;
 precedence left TIMES, DIV, MOD;
 precedence right NOT;
@@ -65,105 +73,190 @@ precedence nonassoc IF, ELSE;
 
 start with prog;
 
-prog ::= decl_list
+prog ::= decl_list:d
+       {: RESULT = new Program(0, 0, d); :}
        | /* vazio */
+       {: RESULT = new Program(0, 0, new ArrayList<CNode>()); :}
        ;
 
-decl_list ::= decl decl_list
-            | decl
+decl_list ::= decl:d decl_list:l
+            {: l.add(0, d); RESULT = l; :}
+            | decl:d
+            {: ArrayList<CNode> l = new ArrayList<>(); l.add(d); RESULT = l; :}
             ;
 
-decl ::= data_decl
-       | func_decl
+decl ::= data_decl:d {: RESULT = d; :}
+       | func_decl:f {: RESULT = f; :}
        ;
 
-data_decl ::= DATA TYID LBRACE bind_list RBRACE
+data_decl ::= DATA TYID:n LBRACE bind_list:b RBRACE
+            {: RESULT = new DataDecl(nleft, nright, n, b); :}
             ;
 
-bind_list ::= bind bind_list
+bind_list ::= bind:b bind_list:l
+            {: l.add(0, b); RESULT = l; :}
             | /* vazio */
+            {: RESULT = new ArrayList<Bind>(); :}
             ;
 
-bind ::= ID COLON type SEMI
+/* CORREÇÃO 1: Criar 'new Var' para passar para o Bind */
+bind ::= ID:n COLON type:t SEMI
+       {: RESULT = new Bind(nleft, nright, t, new Var(nleft, nright, n)); :}
        ;
 
-func_decl ::= ID param_list DCOLON type_annot block
+/* CORREÇÃO 2: Criar 'new Var' dentro do loop de parâmetros */
+func_decl ::= ID:n param_list:p DCOLON type_annot:types block:b
+            {: 
+               CType retType = types.get(types.size()-1); 
+               ArrayList<Bind> params = new ArrayList<>();
+               
+               if (types.size() - 1 != p.size()) {
+                   // Apenas aviso, nao para compilação
+               }
+               
+               for(int i=0; i < p.size() && i < types.size()-1; i++) {
+                   // AQUI: string p.get(i) vira new Var(...)
+                   params.add(new Bind(nleft, nright, types.get(i), new Var(nleft, nright, p.get(i))));
+               }
+               
+               RESULT = new FunDef(nleft, nright, n, params, retType, b); 
+            :}
             ;
 
-param_list ::= param_list ID
+param_list ::= param_list:l ID:n
+             {: l.add(n); RESULT = l; :}
              | /* vazio */
+             {: RESULT = new ArrayList<String>(); :}
              ;
 
-type_annot ::= type ARROW type_annot
-             | ty_join
+type_annot ::= type:t ARROW type_annot:l
+             {: l.add(0, t); RESULT = l; :}
+             | ty_join:t
+             {: ArrayList<CType> l = new ArrayList<>(); l.add(t); RESULT = l; :}
              ;
 
-ty_join ::= type TYPE_AND ty_join
-          | type
+ty_join ::= type:t TYPE_AND ty_join
+          {: RESULT = t; :}
+          | type:t
+          {: RESULT = t; :}
           ;
 
-type ::= basic_type LBRACKET RBRACKET
-       | basic_type
+type ::= basic_type:t LBRACKET RBRACKET
+       {: RESULT = new TyArr(tleft, tright, t); :}
+       | basic_type:t
+       {: RESULT = t; :}
        ;
 
-basic_type ::= TYINT | TYCHAR | TYBOOL | TYFLOAT | VOID | TYID ;
+basic_type ::= TYINT:t   {: RESULT = new TyInt(tleft, tright); :}
+             | TYCHAR:t  {: RESULT = new TyChar(tleft, tright); :}
+             | TYBOOL:t  {: RESULT = new TyBool(tleft, tright); :}
+             | TYFLOAT:t {: RESULT = new TyFloat(tleft, tright); :}
+             | VOID:t    {: RESULT = new TyVoid(tleft, tright); :}
+             | TYID:n    {: RESULT = new TyId(nleft, nright, n); :}
+             ;
 
-block ::= LBRACE cmd_list RBRACE 
+block ::= LBRACE cmd_list:l RBRACE 
+        {: RESULT = new CSeq(lleft, lright, l); :}
         ;
 
-cmd_list ::= cmd cmd_list
+cmd_list ::= cmd:c cmd_list:l
+           {: l.add(0, c); RESULT = l; :}
            | /* vazio */
+           {: RESULT = new ArrayList<CNode>(); :}
            ;
 
-cmd ::= IF LPAREN expr RPAREN cmd
-      | IF LPAREN expr RPAREN cmd ELSE cmd
-      | ITERATE LPAREN loop_cond RPAREN cmd
-      | READ LPAREN RPAREN LT lvalue GT SEMI
-      | PRINT LPAREN expr RPAREN SEMI
-      | READ lvalue SEMI
-      | RETURN expr_list_ne SEMI
-      | RETURN SEMI
-      | lvalue ASSIGN expr SEMI
-      | expr SEMI
-      | block
+cmd ::= IF:k LPAREN expr:e RPAREN cmd:c
+      {: RESULT = new If(kleft, kright, e, c, null); :}
+      | IF:k LPAREN expr:e RPAREN cmd:c1 ELSE cmd:c2
+      {: RESULT = new If(kleft, kright, e, c1, c2); :}
+      | ITERATE:k LPAREN loop_cond:c RPAREN cmd:b
+      {: RESULT = new Iterate(kleft, kright, null, c, b); :}
+      | READ:r LPAREN RPAREN LT lvalue:l GT SEMI
+      {: RESULT = new Read(rleft, rright, l); :}
+      | PRINT:p LPAREN expr:e RPAREN SEMI
+      {: RESULT = new Print(pleft, pright, e); :}
+      | READ:r lvalue:l SEMI
+      {: RESULT = new Read(rleft, rright, l); :}
+      | RETURN:r expr_list_ne:el SEMI
+      {: RESULT = new Return(rleft, rright, el.get(0)); :}
+      | RETURN:r SEMI
+      {: RESULT = new Return(rleft, rright, null); :}
+      | lvalue:l ASSIGN expr:e SEMI
+      {: RESULT = new CAttr(lleft, lright, l, e); :}
+      | expr:e SEMI
+      {: RESULT = e; :}
+      | block:b
+      {: RESULT = b; :}
       | SEMI
+      {: RESULT = new CSeq(0,0, new ArrayList<CNode>()); :}
       ;
 
-loop_cond ::= ID COLON expr
-            | expr
+loop_cond ::= ID:n COLON expr:e
+            {: RESULT = e; :}
+            | expr:e
+            {: RESULT = e; :}
             ;
 
-expr ::= expr PLUS expr
-       | expr MINUS expr
-       | expr TIMES expr
-       | expr DIV expr
-       | expr MOD expr
-       | expr AND expr
-       | expr EQ expr
-       | expr NEQ expr
-       | expr LT expr
-       | NOT expr
-       | LPAREN expr RPAREN
-       | NEW type
-       | NEW type LBRACKET expr RBRACKET
-       | NULL
-       | INT_LIT
-       | FLOAT_LIT
-       | CHAR_LIT
-       | TRUE
-       | FALSE
-       | lvalue
-       | ID LPAREN expr_list_ne RPAREN
-       | ID LPAREN RPAREN
+expr ::= expr:e1 PLUS expr:e2
+       {: RESULT = new Plus(e1left, e1right, e1, e2); :}
+       | expr:e1 MINUS expr:e2
+       {: RESULT = new Sub(e1left, e1right, e1, e2); :}
+       | expr:e1 TIMES expr:e2
+       {: RESULT = new Times(e1left, e1right, e1, e2); :}
+       | expr:e1 DIV expr:e2
+       {: RESULT = new Div(e1left, e1right, e1, e2); :}
+       | expr:e1 MOD expr:e2
+       {: RESULT = new Mod(e1left, e1right, e1, e2); :}
+       | expr:e1 AND expr:e2
+       {: RESULT = new And(e1left, e1right, e1, e2); :}
+       | expr:e1 EQ expr:e2
+       {: RESULT = new Eq(e1left, e1right, e1, e2); :}
+       | expr:e1 NEQ expr:e2
+       {: RESULT = new Neq(e1left, e1right, e1, e2); :}
+       | expr:e1 LT expr:e2
+       {: RESULT = new Lt(e1left, e1right, e1, e2); :}
+       | NOT:n expr:e
+       {: RESULT = new Not(nleft, nright, e); :}
+       | LPAREN expr:e RPAREN
+       {: RESULT = e; :}
+       | NEW:k type:t
+       {: RESULT = new New(kleft, kright, t, null); :}
+       | NEW:k type:t LBRACKET expr:sz RBRACKET
+       {: RESULT = new New(kleft, kright, t, sz); :}
+       | NULL:k
+       {: RESULT = new IntLit(kleft, kright, 0); :}
+       | INT_LIT:i
+       {: RESULT = new IntLit(ileft, iright, i); :}
+       | FLOAT_LIT:f
+       {: RESULT = new FloatLit(fleft, fright, f); :}
+       | CHAR_LIT:c
+       {: RESULT = new IntLit(cleft, cright, (int)c.charAt(1)); :}
+       | TRUE:t
+       {: RESULT = new BoolLit(tleft, tright, true); :}
+       | FALSE:f
+       {: RESULT = new BoolLit(fleft, fright, false); :}
+       | lvalue:l
+       {: RESULT = l; :}
+       | ID:n LPAREN expr_list_ne:el RPAREN
+       {: RESULT = new FCall(nleft, nright, n, el); :}
+       | ID:n LPAREN RPAREN
+       {: RESULT = new FCall(nleft, nright, n, new ArrayList<Exp>()); :}
        ;
 
-expr_list_ne ::= expr COMMA expr_list_ne
-               | expr
+expr_list_ne ::= expr:e COMMA expr_list_ne:l
+               {: l.add(0, e); RESULT = l; :}
+               | expr:e
+               {: ArrayList<Exp> l = new ArrayList<>(); l.add(e); RESULT = l; :}
                ;
 
-lvalue ::= ID
-         | lvalue LBRACKET expr RBRACKET
-         | lvalue DOT ID
-         | ID LPAREN expr_list_ne RPAREN LBRACKET expr RBRACKET
-         | ID LPAREN RPAREN LBRACKET expr RBRACKET
+lvalue ::= ID:n
+         {: RESULT = new Var(nleft, nright, n); :}
+         | lvalue:l LBRACKET expr:e RBRACKET
+         {: RESULT = l; /* Placeholder */ :}
+         | lvalue:l DOT ID:f
+         {: RESULT = l; /* Placeholder */ :}
+         | ID:n LPAREN expr_list_ne:el RPAREN LBRACKET expr:idx RBRACKET
+         {: RESULT = new FCall(nleft, nright, n, el); :}
+         | ID:n LPAREN RPAREN LBRACKET expr:idx RBRACKET
+         {: RESULT = new FCall(nleft, nright, n, new ArrayList<Exp>()); :}
          ;

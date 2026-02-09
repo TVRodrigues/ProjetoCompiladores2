@@ -1,22 +1,15 @@
 package calc.nodes;
+import java.util.List;
 
-import calc.nodes.dotutils.DotFile;
-import calc.nodes.environment.Env;
-import java.util.ArrayList;
-import calc.nodes.decl.FunDef;
+public class Program extends CNode {
+    public List<CNode> decls; // Mudou de List<FunDef> para List<CNode>
 
-public class Program extends CNode{
-
-   private ArrayList<FunDef> funcs;
-
-
-   public Program(int l, int c, ArrayList<FunDef> fs){
-       super(l,c);
-       this.funcs = fs;
-   }
-
-   public ArrayList<FunDef> getFuncs(){return funcs;}
-
-   public void accept(CalcVisitor v){v.visit(this);}
-
+    public Program(int line, int col, List<CNode> decls) {
+        super(line, col);
+        this.decls = decls;
+    }
+    
+    public String toString(){ return "Program"; }
+    
+    public void accept(CalcVisitor v) { v.visit(this); }
 }

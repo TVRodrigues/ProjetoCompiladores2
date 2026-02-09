@@ -5,8 +5,7 @@ import calc.nodes.expr.*;
 import calc.nodes.command.*;
 import calc.nodes.types.*;
 import calc.nodes.*;
-import calc.nodes.CalcVisitor;
-import calc.nodes.visitors.tychkvisitor.CLTypes;
+
 import java.util.Hashtable;
 import java.util.Stack;
 import java.util.LinkedList;
@@ -292,5 +291,19 @@ public  class CodeGenVisitor extends CalcVisitor{
     public void printCode(){
         cg.printCode();
     }
+
+    // Adicione no final do CodeGenVisitor
+    public void visit(Mod e) {}
+    public void visit(And e) {}
+    public void visit(Neq e) {}
+    public void visit(Not e) {}
+    public void visit(DataDecl d) {}
+    public void visit(Iterate d) {}
+    public void visit(Read d) {}
+    public void visit(New e) {}
+    public void visit(TyVoid t) {}
+    public void visit(TyChar t) {}
+    public void visit(TyArr t) {}
+    public void visit(TyId t) {}
 
 }

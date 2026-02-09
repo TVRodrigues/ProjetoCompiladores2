@@ -1,27 +1,17 @@
 package calc.nodes.command;
-
-import calc.nodes.dotutils.DotFile;
-import calc.nodes.environment.Env;
-import calc.nodes.CNode;
+import calc.nodes.*;
 import calc.nodes.expr.Exp;
-import calc.nodes.expr.Var;
-import calc.nodes.CalcVisitor;
 
 public class CAttr extends CNode {
+    public Exp lvalue; // Mudou de Var para Exp
+    public Exp exp;
 
-      private Var v;
-      private Exp e;
-
-      public CAttr(int line, int col, Var v, Exp e){
-          super(line,col);
-          this.v = v;
-          this.e = e;
-      }
-
-      public Exp getExp(){ return e;}
-      public Var getVar(){ return v;}
-
-     public void accept(CalcVisitor v){v.visit(this);}
-
-
+    public CAttr(int line, int col, Exp lvalue, Exp exp) {
+        super(line, col);
+        this.lvalue = lvalue;
+        this.exp = exp;
+    }
+    
+    public String toString(){ return lvalue + " = " + exp; }
+    public void accept(CalcVisitor v) { v.visit(this); }
 }

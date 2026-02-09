@@ -1,24 +1,15 @@
 package calc.nodes.command;
-
-import calc.nodes.dotutils.DotFile;
-import calc.nodes.environment.Env;
-import calc.nodes.CNode;
-import calc.nodes.CalcVisitor;
-
+import calc.nodes.*;
+import java.util.List;
 
 public class CSeq extends CNode {
+    public List<CNode> cmds; // Mudou de left/right para Lista
 
-      private CNode left;
-      private CNode right;
-
-      public CSeq(int line, int col, CNode l, CNode r){
-          super(line,col);
-          left = l;
-          right = r;
-      }
-
-      public CNode getLeft(){ return left;}
-      public CNode getRight(){ return right;}
-
-      public void accept(CalcVisitor v){v.visit(this);}
+    public CSeq(int line, int col, List<CNode> cmds) {
+        super(line, col);
+        this.cmds = cmds;
+    }
+    
+    public String toString(){ return "{ ... }"; }
+    public void accept(CalcVisitor v) { v.visit(this); }
 }

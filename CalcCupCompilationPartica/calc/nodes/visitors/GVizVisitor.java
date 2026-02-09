@@ -5,7 +5,6 @@ import calc.nodes.expr.*;
 import calc.nodes.command.*;
 import calc.nodes.types.*;
 import calc.nodes.*;
-import calc.nodes.CalcVisitor;
 import calc.nodes.dotutils.DotFile;
 
 public  class GVizVisitor extends CalcVisitor{
@@ -192,5 +191,21 @@ public  class GVizVisitor extends CalcVisitor{
     public void visit(TyBool t){ subNode = gf.addNode("TyBool"); }
     public void visit(TyInt t){  subNode = gf.addNode("TyInt");  }
     public void visit(TyFloat t){subNode = gf.addNode("TyFloat");}
+
+    // Implementações vazias para os novos nós do Lang2
+    public void visit(Mod e) { printNode(e.hashCode(), "Mod %"); e.left.accept(this); e.right.accept(this); }
+    public void visit(And e) { printNode(e.hashCode(), "And &&"); e.left.accept(this); e.right.accept(this); }
+    public void visit(Neq e) { printNode(e.hashCode(), "Neq !="); e.left.accept(this); e.right.accept(this); }
+    public void visit(Not e) { printNode(e.hashCode(), "Not !"); e.arg.accept(this); }
+    
+    public void visit(DataDecl d) { printNode(d.hashCode(), "Data " + d.typeName); }
+    public void visit(Iterate d) { printNode(d.hashCode(), "Iterate"); d.body.accept(this); }
+    public void visit(Read d) { printNode(d.hashCode(), "Read"); }
+    public void visit(New e) { printNode(e.hashCode(), "New " + e.type); }
+    
+    public void visit(TyVoid t) { printNode(t.hashCode(), "Void"); }
+    public void visit(TyChar t) { printNode(t.hashCode(), "Char"); }
+    public void visit(TyArr t) { printNode(t.hashCode(), "Arr[]"); }
+    public void visit(TyId t) { printNode(t.hashCode(), "Type " + t.name); }
 
 }
