@@ -1,8 +1,8 @@
 
-all: CalcCompiler.class
+all: Lang2Compiler.class
 
-CalcCompiler.class:  calc/parser/CalcLexer.java calc/parser/CalcParser.java
-	javac  -cp .:tools/java-cup-11b-runtime.jar:tools/ST-4.3.4.jar CalcCompiler.java
+Lang2Compiler.class:  calc/parser/CalcLexer.java calc/parser/CalcParser.java
+	javac  -cp .:tools/java-cup-11b-runtime.jar:tools/ST-4.3.4.jar Lang2Compiler.java
 
 
 calc/parser/CalcParser.java:

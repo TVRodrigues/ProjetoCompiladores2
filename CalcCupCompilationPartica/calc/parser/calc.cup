@@ -1,106 +1,50 @@
-/* Simple +/-/* expression language; parser evaluates constant expressions on the fly*/
-
 package calc.parser;
 
 import java_cup.runtime.*;
 import calc.nodes.*;
-import calc.nodes.decl.*;
-import calc.nodes.command.*;
-import calc.nodes.expr.*;
-import calc.nodes.types.*;
-import java.util.ArrayList;
 
-
-class CalcParser;
+/* Configuração do Parser*/
 parser code {:
-    // Connect this parser to a scanner!
     private CalcLexer s;
-    public CalcParser(CalcLexer s){ this.s=s; }
-    private Boolean error;
-    // Get the line
-    public void report_error(String message, Object info){
-          Symbol s = (Symbol) info;
-          System.err.println(message + " at input " + cur_token.left + ", " + cur_token.right + ": near " + CalcParserSym.terminalNames[s.sym]);
-          System.err.print("Expected symbols: ");
-          int counter = 10;
-          for(Integer i : expected_token_ids()){
-              if(counter <= 0){
-                 System.err.println(CalcParserSym.terminalNames[i] + " " );
-                 counter = 11;
-              }else{
-                 System.err.print(CalcParserSym.terminalNames[i] + " ");
-              }
-              counter --;
-          }
-          System.err.println(" ");
-          System.err.flush();
+    
+    public Lang2Parser(CalcLexer s){ 
+        this.s=s; 
     }
-
-    public void report_fatal_error(String message, Object info) throws java.lang.Exception {
-          done_parsing();
-          // report_error(message, info);
-          throw new Exception("Can't recover from previous error(s)");
+    
+    /* Método para reportar erro */
+    public void syntax_error(Symbol s){ 
+        System.out.println("Erro de sintaxe (linha " + s.left + ", coluna " + s.right + "): " + s.value); 
     }
-
-    public void unrecovered_syntax_error(Symbol cur_token) throws java.lang.Exception {
-          report_fatal_error("Couldn't repair and continue parse", cur_token);
-    }
-
-    public void syntax_error(Symbol cur_token){
-           error = true;
-           report_error("Syntax error ", cur_token );
-
-    }
-
-    boolean hasError(){ return error; }
 :}
 
-init with {:               :};
+/* Conecta com o Lexer */
 scan with {: return s.nextToken(); :};
 
-/* define how to connect to the scanner! */
+/* Palavras reservadas */
+terminal DATA, ITERATE, IF, ELSE, RETURN, NEW, PRINT, READ, NULL;
+terminal VOID;
 
-/*
-   Terminais
-*/
-terminal            SEMI, PLUS, MINUS, TIMES, DIV, LP, RP, ATTR, INTER, OSB, CSB,
-                    OB, CB, COLON, COMA, TYINT, TYFLOAT, TYBOOL, RETURN, PRINT, LTE, LT, EQ;
-terminal Integer    NUMBER;        // our scanner provides numbers as integers
-terminal Float      FLOAT;
-terminal Boolean    TRUE,FALSE;
-terminal String     ID;
+/* Tipos primitivos */
+terminal TYINT, TYCHAR, TYBOOL, TYFLOAT;
 
-/* Non terminals */
-non terminal Exp        expr;      // used to store evaluated subexpressions
-/*
-  Precencia e associatividade dos operadores.
-  Lista em ordem dos de menor prioridade para os de maior
-  prioridade.
-*/
+/* Literais */
+terminal TRUE, FALSE;
+terminal Integer INT_LIT;
+terminal Float FLOAT_LIT;
+terminal String CHAR_LIT;
+terminal String ID, TYID;
 
-/* The grammar rules */
+/* Símbolos e Operadores */
+terminal LPAREN, RPAREN, LBRACKET, RBRACKET, LBRACE, RBRACE;
+terminal COMMA, SEMI, COLON, DOT, DCOLON, ARROW;
+terminal ASSIGN, AND, TYPE_AND, NOT, LT, EQ, NEQ;
+terminal PLUS, MINUS, TIMES, DIV, MOD;
 
-expr  ::= expr:e1 PLUS:t expr:e2      {: RESULT = new Plus(tleft,tright,e1,e2);   :}
-       | expr:e1 MINUS:t expr:e2      {: RESULT = new Sub(tleft,tright,e1,e2);    :}
-       | NUMBER:n	                  {: RESULT = new IntLit(nleft,nright,n);     :}
-       | FLOAT:n	                  {: RESULT = new FloatLit(nleft,nright,n);   :}
-       | TRUE:n	                      {: RESULT = new BoolLit(nleft,nright,n);    :}
-       | ID:v                         {: RESULT = new Var(vleft,vright,v);        :}
-       ;
+/* Variáveis */
+non terminal prog;
 
+/* GRAMÁTICA INICIAL */
+start with prog;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+prog ::= /* vazio: aceita arquivo em branco ou rejeita qualquer coisa por enquanto */
+      ;

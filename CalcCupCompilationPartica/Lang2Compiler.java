@@ -3,12 +3,11 @@ import calc.parser.CalcLexer;
 import calc.parser.CalcParser;
 import java_cup.runtime.Symbol;
 
-public class CalcCompiler {
+public class Lang2Compiler {
 
     public static void main(String[] args) {
-   
         if (args.length == 0) {
-            printHelp();
+            System.out.println("Uso: java Lang2Compiler -syn <arquivo>");
             return;
         }
 
@@ -24,42 +23,25 @@ public class CalcCompiler {
         }
 
        
-        if (args.length == 1) {
-            mode = "default"; 
-            fileName = args[0];
-        } else if (args.length == 2) {
-            mode = args[0];
-            fileName = args[1];
+        if (args.length == 2) {
+             mode = args[0];
+             fileName = args[1];
         } else {
-            System.out.println("Erro: Número inválido de argumentos.");
-            printHelp();
-            return;
+             fileName = args[0];
         }
 
         
         try {
-            
             CalcLexer lexer = new CalcLexer(new FileReader(fileName));
-            CalcParser parser = new CalcParser(lexer);
+            Lang2Parser parser = new Lang2Parser(lexer); // Instancia o parser novo
 
             if (mode.equals("-syn")) {
-                
-                parser.parse(); 
-                
+                parser.parse();
                 System.out.println("accepted");
-            } 
-            else if (mode.equals("-i")) {
-                
-                Symbol s = parser.parse();
-                System.out.println("Interpretador ainda não implementado (Atividade futura).");
-            } 
-            else {
-                System.out.println("Modo não reconhecido ou padrão: " + mode);
+            } else {
+                // Outros modos...
                 parser.parse();
             }
-
-        } catch (FileNotFoundException e) {
-            System.err.println("Arquivo não encontrado: " + fileName);
         } catch (Exception e) {
             if (mode.equals("-syn")) {
                 System.out.println("rejected");
@@ -68,6 +50,7 @@ public class CalcCompiler {
             }
         }
     }
+
     private static void printHelp() {
         System.out.println("Uso: java CalcCompiler [opcao] <arquivo>");
         System.out.println("Opcoes:");
