@@ -1,19 +1,13 @@
 package calc.nodes.expr;
-
-import calc.nodes.dotutils.DotFile;
-import calc.nodes.environment.Env;
 import calc.nodes.CalcVisitor;
 
-public class Var extends Exp{
+public class Var extends Exp {
+    public String name; // <--- PUBLIC
 
-      private String name;
-      public Var(int line, int col, String name){
-           super(line,col);
-           this.name = name;
-      }
-
-      public String getName(){ return name;}
-
-      public void accept(CalcVisitor v){v.visit(this);}
-
+    public Var(int line, int col, String name) {
+        super(line, col);
+        this.name = name;
+    }
+    public String toString() { return name; }
+    public void accept(CalcVisitor v) { v.visit(this); }
 }

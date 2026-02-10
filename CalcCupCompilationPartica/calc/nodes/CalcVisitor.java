@@ -37,6 +37,7 @@ public abstract class CalcVisitor {
     
     public abstract void visit(Lte e);
     public abstract void visit(Lt e);
+    public abstract void visit(Gt e);
     public abstract void visit(Eq e);
     public abstract void visit(Neq e);
     

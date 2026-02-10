@@ -1,24 +1,24 @@
 package calc.nodes.command;
 
-
-import calc.nodes.dotutils.DotFile;
-import calc.nodes.environment.Env;
 import calc.nodes.CNode;
 import calc.nodes.expr.Exp;
 import calc.nodes.CalcVisitor;
 
 public class Print extends CNode {
+    public Exp exp; // <--- PUBLIC e nome 'exp'
 
-      private Exp e;
+    public Print(int line, int col, Exp exp) {
+        super(line, col);
+        this.exp = exp;
+    }
 
-      public Print(int line, int col, Exp e){
-          super(line,col);
-          this.e = e;
-      }
+    @Override
+    public String toString() {
+        return "print " + exp.toString();
+    }
 
-      public Exp getExp(){ return e;}
-
-      public void accept(CalcVisitor v){v.visit(this);}
-
-
+    @Override
+    public void accept(CalcVisitor v) {
+        v.visit(this);
+    }
 }

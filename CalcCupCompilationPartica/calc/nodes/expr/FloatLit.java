@@ -1,22 +1,22 @@
 package calc.nodes.expr;
 
-
-import calc.nodes.dotutils.DotFile;
-import calc.nodes.environment.Env;
 import calc.nodes.CalcVisitor;
 
-public class FloatLit extends Exp{
+public class FloatLit extends Exp {
+    public float value; // <--- PUBLIC
 
-      private float value;
-      public FloatLit(int line, int col, float value){
-           super(line,col);
-           this.value = value;
-      }
+    public FloatLit(int line, int col, float value) {
+        super(line, col);
+        this.value = value;
+    }
 
-      public float getValue(){ return value;}
+    @Override
+    public String toString() {
+        return Float.toString(value);
+    }
 
-
-      public void accept(CalcVisitor v){v.visit(this);}
-
-
+    @Override
+    public void accept(CalcVisitor v) {
+        v.visit(this);
+    }
 }
