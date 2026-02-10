@@ -5,19 +5,18 @@ import calc.nodes.CalcVisitor;
 import java.util.List;
 
 public class DataDecl extends CNode {
-    public String typeName;
-    public List<Bind> fields;
+    public String name;          // Renomeado de typeName para name
+    public List<Bind> binding;   // Renomeado de fields para binding
 
-    // CORREÇÃO: Adicionado line e col ao construtor e ao super()
-    public DataDecl(int line, int col, String typeName, List<Bind> fields) {
+    public DataDecl(int line, int col, String name, List<Bind> binding) {
         super(line, col);
-        this.typeName = typeName;
-        this.fields = fields;
+        this.name = name;
+        this.binding = binding;
     }
 
     @Override
     public String toString() {
-        return "data " + typeName + " {...}";
+        return "data " + name + " {...}";
     }
 
     @Override

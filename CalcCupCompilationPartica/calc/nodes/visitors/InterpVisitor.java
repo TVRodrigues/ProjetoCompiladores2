@@ -7,9 +7,9 @@ import calc.nodes.command.*;
 import calc.nodes.types.*;
 import calc.nodes.environment.Env;
 import java.util.Stack;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
+import java.util.Map;
+import java.util.HashMap;
 
 public class InterpVisitor extends CalcVisitor {
 
@@ -22,12 +22,25 @@ public class InterpVisitor extends CalcVisitor {
         this.envStack.push(new Env());
     }
 
+    // --- Helper: Lógica "Truthiness" (C-Style) ---
+    // Resolve o erro do attrAND.lan (10 && 10)
+    private boolean isTrue(Object o) {
+        if (o instanceof Boolean) return (Boolean) o;
+        if (o instanceof Integer) return (Integer) o != 0;
+        if (o instanceof Float) return ((Float) o) != 0.0f;
+        return false; // null é falso
+    }
+
     // --- Execução do Programa ---
     public void visit(Program p) {
         for (CNode decl : p.decls) {
             if (decl instanceof FunDef) {
                 FunDef f = (FunDef) decl;
                 envStack.peek().put(f.name, f); 
+            } 
+            else if (decl instanceof DataDecl) {
+                DataDecl d = (DataDecl) decl;
+                envStack.peek().put(d.name, d);
             }
         }
         
@@ -37,30 +50,26 @@ public class InterpVisitor extends CalcVisitor {
             mainFunc.body.accept(this);
         } else {
             System.err.println("Erro: Função 'main' não encontrada.");
+            // DEBUG: Mostra o que foi encontrado para ajudar no attrSUB.lan
+            System.err.println("Ambiente Global contém: " + envStack.peek());
         }
     }
 
     public void visit(FunDef d) {}
+    public void visit(DataDecl d) {}
 
-    // --- Declaração de Variável (x : Int;) ---
     public void visit(Bind b) {
         String name = b.getVar().name;
         CType type = b.getType();
-        
-        // Valor padrão
         Object initVal = null;
         if (type instanceof TyInt) initVal = 0;
         else if (type instanceof TyFloat) initVal = 0.0f;
         else if (type instanceof TyBool) initVal = false;
-        
         envStack.peek().put(name, initVal);
     }
 
-    // --- Comandos ---
     public void visit(CSeq s) {
-        for (CNode cmd : s.cmds) {
-            cmd.accept(this);
-        }
+        for (CNode cmd : s.cmds) cmd.accept(this);
     }
 
     public void visit(Print p) {
@@ -68,10 +77,42 @@ public class InterpVisitor extends CalcVisitor {
         System.out.println(lastValue);
     }
 
+    public void visit(CAttr a) {
+        if (a.lvalue instanceof Var) {
+            String name = ((Var) a.lvalue).name;
+            a.exp.accept(this);
+            envStack.peek().put(name, lastValue);
+        } 
+        else if (a.lvalue instanceof ArrayAccess) {
+            ArrayAccess aa = (ArrayAccess) a.lvalue;
+            aa.array.accept(this);
+            Object[] arr = (Object[]) lastValue;
+            if (arr != null) {
+                Object[] targetArray = arr; 
+                aa.index.accept(this);
+                int idx = (lastValue instanceof Integer) ? (Integer)lastValue : ((Float)lastValue).intValue();
+                a.exp.accept(this);
+                if (idx >= 0 && idx < targetArray.length) targetArray[idx] = lastValue;
+                else System.err.println("Erro Runtime: Indice fora dos limites.");
+            }
+        }
+        else if (a.lvalue instanceof FieldAccess) {
+            FieldAccess fa = (FieldAccess) a.lvalue;
+            fa.exp.accept(this);
+            if (lastValue instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> instance = (Map<String, Object>) lastValue;
+                a.exp.accept(this);
+                if (instance.containsKey(fa.field)) instance.put(fa.field, lastValue);
+                else System.err.println("Erro: Campo '" + fa.field + "' inexistente.");
+            }
+        }
+    }
+
     public void visit(If i) {
         i.cond.accept(this);
-        Boolean cond = (Boolean) lastValue;
-        if (cond) {
+        // Usa isTrue() para aceitar Int ou Bool na condição
+        if (isTrue(lastValue)) {
             i.thenMsg.accept(this);
         } else if (i.elseMsg != null) {
             i.elseMsg.accept(this);
@@ -85,9 +126,7 @@ public class InterpVisitor extends CalcVisitor {
         else if (lastValue instanceof Float) count = ((Float) lastValue).intValue();
         
         for (int k = 0; k < count; k++) {
-            if (i.varName != null) {
-                envStack.peek().put(i.varName, k);
-            }
+            if (i.varName != null) envStack.peek().put(i.varName, k);
             i.body.accept(this);
         }
     }
@@ -95,7 +134,6 @@ public class InterpVisitor extends CalcVisitor {
     public void visit(Read r) {
         if (r.lvalue instanceof Var) {
             String name = ((Var) r.lvalue).name;
-            // System.out.print("> ");
             if (scan.hasNextInt()) envStack.peek().put(name, scan.nextInt());
             else if (scan.hasNextFloat()) envStack.peek().put(name, scan.nextFloat());
             else if (scan.hasNextBoolean()) envStack.peek().put(name, scan.nextBoolean());
@@ -103,10 +141,9 @@ public class InterpVisitor extends CalcVisitor {
         }
     }
     
-    public void visit(Return r) { /* Simplificado */ }
+    public void visit(Return r) {}
     public void visit(Loop l) {}
 
-    // --- Operações ---
     public void visit(IntLit i) { lastValue = i.value; }
     public void visit(FloatLit f) { lastValue = f.value; }
     public void visit(BoolLit b) { lastValue = b.value; }
@@ -164,41 +201,34 @@ public class InterpVisitor extends CalcVisitor {
         else lastValue = ((Number)v1).floatValue() < ((Number)v2).floatValue();
     }
     
-    public void visit(Lte e) {
-        e.left.accept(this);  Object v1 = lastValue;
+    public void visit(Lte e) { 
+        e.left.accept(this); Object v1 = lastValue;
         e.right.accept(this); Object v2 = lastValue;
-        
-        if (v1 instanceof Integer && v2 instanceof Integer) {
-            lastValue = (Integer)v1 <= (Integer)v2;
-        } else if (v1 instanceof Number && v2 instanceof Number) {
-            lastValue = ((Number)v1).floatValue() <= ((Number)v2).floatValue();
-        } else {
-            lastValue = false;
-        }
+        if (v1 instanceof Integer && v2 instanceof Integer) lastValue = (Integer)v1 <= (Integer)v2;
+        else lastValue = ((Number)v1).floatValue() <= ((Number)v2).floatValue();
     }
-
-    public void visit(Gt e) {
-        e.left.accept(this);  Object v1 = lastValue;
+    
+    public void visit(Gt e) { 
+        e.left.accept(this); Object v1 = lastValue;
         e.right.accept(this); Object v2 = lastValue;
-        
-        if (v1 instanceof Integer && v2 instanceof Integer) {
-            lastValue = (Integer)v1 > (Integer)v2;
-        } else if (v1 instanceof Number && v2 instanceof Number) {
-            lastValue = ((Number)v1).floatValue() > ((Number)v2).floatValue();
-        } else {
-            lastValue = false;
-        }
+        if (v1 instanceof Integer && v2 instanceof Integer) lastValue = (Integer)v1 > (Integer)v2;
+        else lastValue = ((Number)v1).floatValue() > ((Number)v2).floatValue();
     }
 
     public void visit(And e) {
         e.left.accept(this);
-        if (!(Boolean)lastValue) lastValue = false;
-        else { e.right.accept(this); }
+        // CORREÇÃO: Usa isTrue() para evitar ClassCastException
+        if (!isTrue(lastValue)) {
+            lastValue = false;
+        } else {
+            e.right.accept(this);
+            lastValue = isTrue(lastValue);
+        }
     }
 
     public void visit(Not e) {
         e.arg.accept(this);
-        lastValue = !((Boolean)lastValue);
+        lastValue = !isTrue(lastValue);
     }
 
     public void visit(Var v) {
@@ -206,142 +236,52 @@ public class InterpVisitor extends CalcVisitor {
         if (val == null) System.err.println("Erro: Variavel " + v.name + " nao inicializada");
         lastValue = val;
     }
-
     
-    public void visit(ArrayAccess e) {
-        // 1. Avalia o vetor
-        e.array.accept(this);
-        Object[] arr = (Object[]) lastValue; // Assume que é array
-        
-        if (arr == null) {
-            System.err.println("Erro Runtime: Acesso a vetor nulo ou não inicializado.");
-            return;
-        }
-
-        // 2. Avalia o índice
-        e.index.accept(this);
-        int idx = 0;
-        if (lastValue instanceof Integer) idx = (Integer) lastValue;
-        else if (lastValue instanceof Float) idx = ((Float) lastValue).intValue();
-
-        // 3. Retorna o valor
-        if (idx >= 0 && idx < arr.length) {
-            lastValue = arr[idx];
-        } else {
-            System.err.println("Erro Runtime: Indice " + idx + " fora dos limites (Tam: " + arr.length + ")");
-            lastValue = null; // Ou valor padrão
-        }
-    }
-
-    // --- Structs (Declaração) ---
-    public void visit(DataDecl d) {
-        // Guarda a definição da struct no ambiente para saber quais campos criar depois
-        envStack.peek().put(d.name, d);
-    }
-
-    // --- Criação (New) - Atualizado para Arrays e Structs ---
     public void visit(New e) {
-        // Caso 1: Array (já tinhas este)
         if (e.size != null) {
             e.size.accept(this);
-            int size = 0;
-            if (lastValue instanceof Integer) size = (Integer) lastValue;
-            
+            int size = (lastValue instanceof Integer) ? (Integer) lastValue : 0;
             Object[] array = new Object[size];
-            Object def = null;
-            if (e.type instanceof TyInt) def = 0;
-            else if (e.type instanceof TyFloat) def = 0.0f;
-            else if (e.type instanceof TyBool) def = false;
-            
+            Object def = (e.type instanceof TyInt) ? 0 : (e.type instanceof TyFloat ? 0.0f : false);
             for(int i=0; i<size; i++) array[i] = def;
             lastValue = array;
         } 
-        // Caso 2: Struct (NOVO)
         else if (e.type instanceof TyId) {
             String structName = ((TyId)e.type).name;
             Object declObj = envStack.peek().get(structName);
-            
             if (declObj instanceof DataDecl) {
                 DataDecl decl = (DataDecl) declObj;
-                // Representamos a struct como um HashMap<NomeCampo, Valor>
                 Map<String, Object> instance = new HashMap<>();
-                
-                // Inicializa cada campo com valor padrão
-                for (Bind b : decl.binding) { // 'binding' deve ser public no DataDecl
-                    String fieldName = b.getVar().name;
-                    CType t = b.getType();
-                    
-                    Object def = null;
-                    if (t instanceof TyInt) def = 0;
-                    else if (t instanceof TyFloat) def = 0.0f;
-                    else if (t instanceof TyBool) def = false;
-                    
-                    instance.put(fieldName, def);
+                for (Bind b : decl.binding) {
+                    Object def = (b.getType() instanceof TyInt) ? 0 : (b.getType() instanceof TyFloat ? 0.0f : false);
+                    instance.put(b.getVar().name, def);
                 }
                 lastValue = instance;
-            } else {
-                System.err.println("Erro: Tipo '" + structName + "' nao definido.");
-                lastValue = null;
             }
         }
     }
+    
+    public void visit(ArrayAccess e) {
+        e.array.accept(this);
+        Object[] arr = (Object[]) lastValue;
+        if (arr != null) {
+            e.index.accept(this);
+            int idx = (lastValue instanceof Integer) ? (Integer)lastValue : 0;
+            if (idx >= 0 && idx < arr.length) lastValue = arr[idx];
+            else System.err.println("Erro: Indice invalido");
+        }
+    }
 
-    // --- Acesso a Campo (p.x) ---
     public void visit(FieldAccess e) {
         e.exp.accept(this);
         if (lastValue instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<String, Object> instance = (Map<String, Object>) lastValue;
-            if (instance.containsKey(e.field)) {
-                lastValue = instance.get(e.field);
-            } else {
-                System.err.println("Erro: Campo '" + e.field + "' nao existe.");
-            }
-        } else {
-            System.err.println("Erro: Tentativa de acesso a campo em algo que nao e struct.");
+            if (instance.containsKey(e.field)) lastValue = instance.get(e.field);
+            else System.err.println("Erro: Campo '" + e.field + "' nao existe.");
         }
     }
 
-    // --- Atribuição (Atualizado para p.x = 10) ---
-    public void visit(CAttr a) {
-        if (a.lvalue instanceof Var) {
-            String name = ((Var) a.lvalue).name;
-            a.exp.accept(this);
-            envStack.peek().put(name, lastValue);
-        } 
-        else if (a.lvalue instanceof ArrayAccess) {
-            // ... (código do array igual ao anterior) ...
-            ArrayAccess aa = (ArrayAccess) a.lvalue;
-            aa.array.accept(this);
-            Object[] arr = (Object[]) lastValue;
-            if (arr != null) {
-                Object[] targetArray = arr; 
-                aa.index.accept(this);
-                int idx = (lastValue instanceof Integer) ? (Integer)lastValue : 0;
-                a.exp.accept(this);
-                if (idx >= 0 && idx < targetArray.length) targetArray[idx] = lastValue;
-            }
-        }
-        // Caso 3: Campo de Struct (NOVO)
-        else if (a.lvalue instanceof FieldAccess) {
-            FieldAccess fa = (FieldAccess) a.lvalue;
-            fa.exp.accept(this); // Avalia quem é o objeto (ex: 'p')
-            
-            if (lastValue instanceof Map) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> instance = (Map<String, Object>) lastValue;
-                
-                // Avalia o valor a atribuir
-                a.exp.accept(this);
-                
-                if (instance.containsKey(fa.field)) {
-                    instance.put(fa.field, lastValue);
-                } else {
-                    System.err.println("Erro: Campo '" + fa.field + "' inexistente.");
-                }
-            }
-        }
-    }
     public void visit(FCall e) {}
     public void visit(TyInt t) {}
     public void visit(TyFloat t) {}

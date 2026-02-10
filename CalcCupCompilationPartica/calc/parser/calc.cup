@@ -99,7 +99,10 @@ bind_list ::= bind:b bind_list:l
             {: RESULT = new ArrayList<Bind>(); :}
             ;
 
+/* CORREÇÃO: Aceitar ':' ou '::' para declarações */
 bind ::= ID:n COLON type:t SEMI
+       {: RESULT = new Bind(nleft, nright, t, new Var(nleft, nright, n)); :}
+       | ID:n DCOLON type:t SEMI
        {: RESULT = new Bind(nleft, nright, t, new Var(nleft, nright, n)); :}
        ;
 
@@ -210,14 +213,10 @@ expr ::= expr:e1 PLUS expr:e2
        {: RESULT = new Not(nleft, nright, e); :}
        | LPAREN expr:e RPAREN
        {: RESULT = e; :}
-       /* --- REGRAS DE NEW CORRIGIDAS --- */
-       /* Instanciação de Struct: new Ponto */
        | NEW:k TYID:n
        {: RESULT = new New(kleft, kright, new TyId(nleft, nright, n), null); :}
-       /* Instanciação de Array: new Int[10] */
        | NEW:k basic_type:t LBRACKET expr:sz RBRACKET
        {: RESULT = new New(kleft, kright, t, sz); :}
-       /* -------------------------------- */
        | NULL:k
        {: RESULT = new IntLit(kleft, kright, 0); :}
        | INT_LIT:i
