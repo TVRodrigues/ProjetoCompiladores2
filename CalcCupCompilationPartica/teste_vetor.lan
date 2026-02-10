@@ -1,0 +1,22 @@
+main :: Void {
+   -- Declara um vetor de inteiros
+   v : Int[];
+   
+   -- Instancia com tamanho 3 (posicoes 0, 1, 2)
+   v = new Int[3];
+   
+   -- Atribui valores
+   v[0] = 10;
+   v[1] = 20;
+   
+   -- Usa os valores em uma expressao (10 + 20)
+   v[2] = v[0] + v[1];
+   
+   print(v[2]); -- Deve imprimir 30
+   
+   -- Teste com loop (preenche o vetor)
+   iterate(i : 3) {
+       v[i] = i; 
+   }
+   print(v[2]); -- Deve imprimir 2
+}

@@ -60,4 +60,7 @@ public abstract class CalcVisitor {
     public abstract void visit(TyChar t);
     public abstract void visit(TyArr t);
     public abstract void visit(TyId t);
+
+    public abstract void visit(ArrayAccess e);
+    public abstract void visit(FieldAccess e);
 }

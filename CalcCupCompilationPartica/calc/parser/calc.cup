@@ -182,7 +182,6 @@ cmd ::= IF:k LPAREN expr:e RPAREN cmd:c
       {: RESULT = b; :}
       | SEMI
       {: RESULT = new CSeq(0,0, new ArrayList<CNode>()); :}
-      /* CORREÇÃO AQUI: Permitir declaração dentro de bloco */
       | bind:b
       {: RESULT = b; :}
       ;
@@ -211,10 +210,14 @@ expr ::= expr:e1 PLUS expr:e2
        {: RESULT = new Not(nleft, nright, e); :}
        | LPAREN expr:e RPAREN
        {: RESULT = e; :}
-       | NEW:k type:t
-       {: RESULT = new New(kleft, kright, t, null); :}
-       | NEW:k type:t LBRACKET expr:sz RBRACKET
+       /* --- REGRAS DE NEW CORRIGIDAS --- */
+       /* Instanciação de Struct: new Ponto */
+       | NEW:k TYID:n
+       {: RESULT = new New(kleft, kright, new TyId(nleft, nright, n), null); :}
+       /* Instanciação de Array: new Int[10] */
+       | NEW:k basic_type:t LBRACKET expr:sz RBRACKET
        {: RESULT = new New(kleft, kright, t, sz); :}
+       /* -------------------------------- */
        | NULL:k
        {: RESULT = new IntLit(kleft, kright, 0); :}
        | INT_LIT:i
@@ -244,9 +247,9 @@ expr_list_ne ::= expr:e COMMA expr_list_ne:l
 lvalue ::= ID:n
          {: RESULT = new Var(nleft, nright, n); :}
          | lvalue:l LBRACKET expr:e RBRACKET
-         {: RESULT = l; /* Placeholder */ :}
+         {: RESULT = new ArrayAccess(lleft, lright, l, e); :}
          | lvalue:l DOT ID:f
-         {: RESULT = l; /* Placeholder */ :}
+         {: RESULT = new FieldAccess(lleft, lright, l, f); :}
          | ID:n LPAREN expr_list_ne:el RPAREN LBRACKET expr:idx RBRACKET
          {: RESULT = new FCall(nleft, nright, n, el); :}
          | ID:n LPAREN RPAREN LBRACKET expr:idx RBRACKET

@@ -7,6 +7,8 @@ import calc.nodes.command.*;
 import calc.nodes.types.*;
 import calc.nodes.environment.Env;
 import java.util.Stack;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class InterpVisitor extends CalcVisitor {
@@ -39,7 +41,6 @@ public class InterpVisitor extends CalcVisitor {
     }
 
     public void visit(FunDef d) {}
-    public void visit(DataDecl d) {}
 
     // --- Declaração de Variável (x : Int;) ---
     public void visit(Bind b) {
@@ -65,14 +66,6 @@ public class InterpVisitor extends CalcVisitor {
     public void visit(Print p) {
         p.exp.accept(this);
         System.out.println(lastValue);
-    }
-
-    public void visit(CAttr a) {
-        if (a.lvalue instanceof Var) {
-            String name = ((Var) a.lvalue).name;
-            a.exp.accept(this);
-            envStack.peek().put(name, lastValue);
-        }
     }
 
     public void visit(If i) {
@@ -214,8 +207,142 @@ public class InterpVisitor extends CalcVisitor {
         lastValue = val;
     }
 
+    
+    public void visit(ArrayAccess e) {
+        // 1. Avalia o vetor
+        e.array.accept(this);
+        Object[] arr = (Object[]) lastValue; // Assume que é array
+        
+        if (arr == null) {
+            System.err.println("Erro Runtime: Acesso a vetor nulo ou não inicializado.");
+            return;
+        }
+
+        // 2. Avalia o índice
+        e.index.accept(this);
+        int idx = 0;
+        if (lastValue instanceof Integer) idx = (Integer) lastValue;
+        else if (lastValue instanceof Float) idx = ((Float) lastValue).intValue();
+
+        // 3. Retorna o valor
+        if (idx >= 0 && idx < arr.length) {
+            lastValue = arr[idx];
+        } else {
+            System.err.println("Erro Runtime: Indice " + idx + " fora dos limites (Tam: " + arr.length + ")");
+            lastValue = null; // Ou valor padrão
+        }
+    }
+
+    // --- Structs (Declaração) ---
+    public void visit(DataDecl d) {
+        // Guarda a definição da struct no ambiente para saber quais campos criar depois
+        envStack.peek().put(d.name, d);
+    }
+
+    // --- Criação (New) - Atualizado para Arrays e Structs ---
+    public void visit(New e) {
+        // Caso 1: Array (já tinhas este)
+        if (e.size != null) {
+            e.size.accept(this);
+            int size = 0;
+            if (lastValue instanceof Integer) size = (Integer) lastValue;
+            
+            Object[] array = new Object[size];
+            Object def = null;
+            if (e.type instanceof TyInt) def = 0;
+            else if (e.type instanceof TyFloat) def = 0.0f;
+            else if (e.type instanceof TyBool) def = false;
+            
+            for(int i=0; i<size; i++) array[i] = def;
+            lastValue = array;
+        } 
+        // Caso 2: Struct (NOVO)
+        else if (e.type instanceof TyId) {
+            String structName = ((TyId)e.type).name;
+            Object declObj = envStack.peek().get(structName);
+            
+            if (declObj instanceof DataDecl) {
+                DataDecl decl = (DataDecl) declObj;
+                // Representamos a struct como um HashMap<NomeCampo, Valor>
+                Map<String, Object> instance = new HashMap<>();
+                
+                // Inicializa cada campo com valor padrão
+                for (Bind b : decl.binding) { // 'binding' deve ser public no DataDecl
+                    String fieldName = b.getVar().name;
+                    CType t = b.getType();
+                    
+                    Object def = null;
+                    if (t instanceof TyInt) def = 0;
+                    else if (t instanceof TyFloat) def = 0.0f;
+                    else if (t instanceof TyBool) def = false;
+                    
+                    instance.put(fieldName, def);
+                }
+                lastValue = instance;
+            } else {
+                System.err.println("Erro: Tipo '" + structName + "' nao definido.");
+                lastValue = null;
+            }
+        }
+    }
+
+    // --- Acesso a Campo (p.x) ---
+    public void visit(FieldAccess e) {
+        e.exp.accept(this);
+        if (lastValue instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> instance = (Map<String, Object>) lastValue;
+            if (instance.containsKey(e.field)) {
+                lastValue = instance.get(e.field);
+            } else {
+                System.err.println("Erro: Campo '" + e.field + "' nao existe.");
+            }
+        } else {
+            System.err.println("Erro: Tentativa de acesso a campo em algo que nao e struct.");
+        }
+    }
+
+    // --- Atribuição (Atualizado para p.x = 10) ---
+    public void visit(CAttr a) {
+        if (a.lvalue instanceof Var) {
+            String name = ((Var) a.lvalue).name;
+            a.exp.accept(this);
+            envStack.peek().put(name, lastValue);
+        } 
+        else if (a.lvalue instanceof ArrayAccess) {
+            // ... (código do array igual ao anterior) ...
+            ArrayAccess aa = (ArrayAccess) a.lvalue;
+            aa.array.accept(this);
+            Object[] arr = (Object[]) lastValue;
+            if (arr != null) {
+                Object[] targetArray = arr; 
+                aa.index.accept(this);
+                int idx = (lastValue instanceof Integer) ? (Integer)lastValue : 0;
+                a.exp.accept(this);
+                if (idx >= 0 && idx < targetArray.length) targetArray[idx] = lastValue;
+            }
+        }
+        // Caso 3: Campo de Struct (NOVO)
+        else if (a.lvalue instanceof FieldAccess) {
+            FieldAccess fa = (FieldAccess) a.lvalue;
+            fa.exp.accept(this); // Avalia quem é o objeto (ex: 'p')
+            
+            if (lastValue instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> instance = (Map<String, Object>) lastValue;
+                
+                // Avalia o valor a atribuir
+                a.exp.accept(this);
+                
+                if (instance.containsKey(fa.field)) {
+                    instance.put(fa.field, lastValue);
+                } else {
+                    System.err.println("Erro: Campo '" + fa.field + "' inexistente.");
+                }
+            }
+        }
+    }
     public void visit(FCall e) {}
-    public void visit(New e) {}
     public void visit(TyInt t) {}
     public void visit(TyFloat t) {}
     public void visit(TyBool t) {}
