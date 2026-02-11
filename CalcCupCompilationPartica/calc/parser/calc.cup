@@ -33,7 +33,7 @@ terminal TYINT, TYCHAR, TYBOOL, TYFLOAT;
 terminal Boolean TRUE, FALSE;
 terminal Integer INT_LIT;
 terminal Float FLOAT_LIT;
-terminal String CHAR_LIT;
+terminal Integer CHAR_LIT;
 terminal String ID, TYID;
 
 terminal LPAREN, RPAREN, LBRACKET, RBRACKET, LBRACE, RBRACE;
@@ -227,7 +227,7 @@ expr ::= expr:e1 PLUS expr:e2
        | FLOAT_LIT:f
        {: RESULT = new FloatLit(fleft, fright, f); :}
        | CHAR_LIT:c
-       {: RESULT = new IntLit(cleft, cright, (int)c.charAt(1)); :}
+       {: RESULT = new IntLit(cleft, cright, c); :}
        | TRUE:t
        {: RESULT = new BoolLit(tleft, tright, true); :}
        | FALSE:f

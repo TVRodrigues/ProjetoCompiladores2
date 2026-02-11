@@ -23,6 +23,33 @@ import java_cup.runtime.Symbol;
     private float toFloat(String s){
        try{ return Float.parseFloat(s); } catch(Exception e){ return 0; }
     }
+    private int parseCharLiteral(String text) {
+        // text vem como: 'a' ou '\n'
+        // Remove as aspas simples
+        String content = text.substring(1, text.length() - 1);
+        
+        // Se for simples (ex: 'a'), retorna o char
+        if (content.length() == 1 && content.charAt(0) != '\\') {
+            return content.charAt(0);
+        }
+        
+        // Se for escape (ex: \n, \t, \0, \\, \')
+        if (content.length() >= 2 && content.charAt(0) == '\\') {
+            char code = content.charAt(1);
+            switch (code) {
+                case 'n': return '\n';
+                case 't': return '\t';
+                case 'r': return '\r';
+                case 'b': return '\b';
+                case 'f': return '\f';
+                case '0': return '\0'; // Nulo
+                case '\'': return '\'';
+                case '\\': return '\\';
+                default: return code; // Fallback
+            }
+        }
+        return content.charAt(0);
+    }
 %}
 
 white       = [ \t\r\n]+
@@ -100,7 +127,7 @@ char_lit     = "'" {char_content} "'"
     {id}        { return new Symbol(Lang2ParserSym.ID, yyline+1, yycolumn+1, yytext()); }
     {int}       { return new Symbol(Lang2ParserSym.INT_LIT, yyline+1, yycolumn+1, toInt(yytext())); }
     {float}     { return new Symbol(Lang2ParserSym.FLOAT_LIT, yyline+1, yycolumn+1, toFloat(yytext())); }
-    {char_lit}  { return new Symbol(Lang2ParserSym.CHAR_LIT, yyline+1, yycolumn+1, yytext()); }
+    {char_lit}  { return new Symbol(Lang2ParserSym.CHAR_LIT, yyline+1, yycolumn+1, parseCharLiteral(yytext())); }
     
     .           { throw new Error("Caractere ilegal <" + yytext() + "> na linha " + yyline); }
 }

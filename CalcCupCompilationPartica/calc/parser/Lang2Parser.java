@@ -1371,8 +1371,8 @@ class CUP$Lang2Parser$actions {
               Exp RESULT =null;
 		int cleft = ((java_cup.runtime.Symbol)CUP$Lang2Parser$stack.peek()).left;
 		int cright = ((java_cup.runtime.Symbol)CUP$Lang2Parser$stack.peek()).right;
-		String c = (String)((java_cup.runtime.Symbol) CUP$Lang2Parser$stack.peek()).value;
-		 RESULT = new IntLit(cleft, cright, (int)c.charAt(1)); 
+		Integer c = (Integer)((java_cup.runtime.Symbol) CUP$Lang2Parser$stack.peek()).value;
+		 RESULT = new IntLit(cleft, cright, c); 
               CUP$Lang2Parser$result = parser.getSymbolFactory().newSymbol("expr",15, ((java_cup.runtime.Symbol)CUP$Lang2Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Lang2Parser$stack.peek()), RESULT);
             }
           return CUP$Lang2Parser$result;
