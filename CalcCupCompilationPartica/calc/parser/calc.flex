@@ -82,6 +82,7 @@ char_lit     = "'" {char_content} "'"
     "->"        { return new Symbol(Lang2ParserSym.ARROW, yyline+1, yycolumn+1); }
     "="         { return new Symbol(Lang2ParserSym.ASSIGN, yyline+1, yycolumn+1); }
     "&&"        { return new Symbol(Lang2ParserSym.AND, yyline+1, yycolumn+1); }
+    "||"        { return new Symbol(Lang2ParserSym.OR, yyline+1, yycolumn+1); }
     "&"         { return new Symbol(Lang2ParserSym.TYPE_AND, yyline+1, yycolumn+1); }
     "!"         { return new Symbol(Lang2ParserSym.NOT, yyline+1, yycolumn+1); }
     "<"         { return new Symbol(Lang2ParserSym.LT, yyline+1, yycolumn+1); }

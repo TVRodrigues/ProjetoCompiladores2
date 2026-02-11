@@ -42,6 +42,7 @@ public abstract class CalcVisitor {
     public abstract void visit(Neq e);
     
     public abstract void visit(And e);
+    public abstract void visit(Or e);
     public abstract void visit(Not e);
     
     public abstract void visit(Var e);

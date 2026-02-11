@@ -38,7 +38,7 @@ terminal String ID, TYID;
 
 terminal LPAREN, RPAREN, LBRACKET, RBRACKET, LBRACE, RBRACE;
 terminal COMMA, SEMI, COLON, DOT, DCOLON, ARROW;
-terminal ASSIGN, AND, TYPE_AND, NOT, LT, GT, EQ, NEQ;
+terminal ASSIGN, AND, OR, TYPE_AND, NOT, LT, GT, EQ, NEQ;
 terminal PLUS, MINUS, TIMES, DIV, MOD;
 
 /* --- NÃO TERMINAIS --- */
@@ -61,6 +61,7 @@ non terminal ArrayList<Exp> expr_list_ne;
 non terminal Exp lvalue;
 
 /* --- PRECEDÊNCIA --- */
+precedence left OR;
 precedence left AND;
 precedence nonassoc EQ, NEQ, LT, GT;
 precedence left PLUS, MINUS;
@@ -201,6 +202,8 @@ expr ::= expr:e1 PLUS expr:e2
        {: RESULT = new Mod(e1left, e1right, e1, e2); :}
        | expr:e1 AND expr:e2
        {: RESULT = new And(e1left, e1right, e1, e2); :}
+       | expr:e1 OR expr:e2
+       {: RESULT = new Or(e1left, e1right, e1, e2); :}
        | expr:e1 EQ expr:e2
        {: RESULT = new Eq(e1left, e1right, e1, e2); :}
        | expr:e1 NEQ expr:e2

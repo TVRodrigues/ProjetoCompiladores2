@@ -215,6 +215,18 @@ public class InterpVisitor extends CalcVisitor {
         else lastValue = ((Number)v1).floatValue() > ((Number)v2).floatValue();
     }
 
+    public void visit(Or e) {
+        e.left.accept(this);
+        // Se o primeiro já for verdadeiro, o resultado é TRUE (curto-circuito)
+        if (isTrue(lastValue)) {
+            lastValue = true;
+        } else {
+            // Caso contrário, avalia o segundo
+            e.right.accept(this);
+            lastValue = isTrue(lastValue);
+        }
+    }
+
     public void visit(And e) {
         e.left.accept(this);
         // CORREÇÃO: Usa isTrue() para evitar ClassCastException
