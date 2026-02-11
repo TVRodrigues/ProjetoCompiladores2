@@ -2,7 +2,7 @@ package calc.nodes.expr;
 import calc.nodes.CalcVisitor;
 
 public class IntLit extends Exp {
-    public int value; // <--- PUBLIC
+    public int value;
 
     public IntLit(int line, int col, int value) {
         super(line, col);

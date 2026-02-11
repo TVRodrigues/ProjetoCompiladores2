@@ -2,7 +2,7 @@ package calc.nodes.expr;
 import calc.nodes.CalcVisitor;
 
 public class Var extends Exp {
-    public String name; // <--- PUBLIC
+    public String name;
 
     public Var(int line, int col, String name) {
         super(line, col);

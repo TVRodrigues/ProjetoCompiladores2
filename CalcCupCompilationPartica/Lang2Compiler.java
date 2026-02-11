@@ -2,7 +2,7 @@ import java.io.*;
 import calc.parser.CalcLexer;
 import calc.parser.Lang2Parser;
 import calc.nodes.Program; 
-import calc.nodes.visitors.InterpVisitor; // Vamos usar este cara agora
+import calc.nodes.visitors.InterpVisitor;
 import java_cup.runtime.Symbol;
 
 public class Lang2Compiler {
@@ -39,14 +39,11 @@ public class Lang2Compiler {
                 System.out.println("accepted");
             } 
             else if (mode.equals("-i")) {
-                // 1. Executa o Parser e pega a raiz da arvore (Symbol)
                 Symbol s = parser.parse();
-                Program prog = (Program) s.value; // Casting para nosso nó raiz
-                
-                // 2. Cria e roda o Interpretador
+                Program prog = (Program) s.value;
                 if (prog != null) {
                     InterpVisitor interpreter = new InterpVisitor();
-                    interpreter.visit(prog); // Começa a execução!
+                    interpreter.visit(prog);
                 }
             }
             else {
@@ -55,7 +52,6 @@ public class Lang2Compiler {
         } catch (Exception e) {
             if (mode.equals("-syn")) {
                 System.out.println("rejected");
-                // e.printStackTrace(); // Descomente para debug
             } else {
                 e.printStackTrace();
             }

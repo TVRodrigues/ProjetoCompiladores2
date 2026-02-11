@@ -3,7 +3,7 @@ import calc.nodes.*;
 import calc.nodes.expr.Exp;
 
 public class CAttr extends CNode {
-    public Exp lvalue; // Mudou de Var para Exp
+    public Exp lvalue;
     public Exp exp;
 
     public CAttr(int line, int col, Exp lvalue, Exp exp) {

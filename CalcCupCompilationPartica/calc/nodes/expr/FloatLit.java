@@ -3,7 +3,7 @@ package calc.nodes.expr;
 import calc.nodes.CalcVisitor;
 
 public class FloatLit extends Exp {
-    public float value; // <--- PUBLIC
+    public float value;
 
     public FloatLit(int line, int col, float value) {
         super(line, col);

@@ -5,9 +5,8 @@ import calc.nodes.types.CType;
 
 public class New extends Exp {
     public CType type;
-    public Exp size; 
+    public Exp size;
 
-    // CORREÇÃO: Adicionado line e col
     public New(int line, int col, CType type, Exp size) {
         super(line, col);
         this.type = type;

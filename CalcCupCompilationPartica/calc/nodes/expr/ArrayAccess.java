@@ -2,8 +2,8 @@ package calc.nodes.expr;
 import calc.nodes.CalcVisitor;
 
 public class ArrayAccess extends Exp {
-    public Exp array; // O vetor (ex: 'v' ou 'v[0]')
-    public Exp index; // O índice (ex: 0, i, ou i+1)
+    public Exp array;
+    public Exp index;
 
     public ArrayAccess(int line, int col, Exp array, Exp index) {
         super(line, col);

@@ -5,8 +5,8 @@ import calc.nodes.CalcVisitor;
 import java.util.List;
 
 public class DataDecl extends CNode {
-    public String name;          // Renomeado de typeName para name
-    public List<Bind> binding;   // Renomeado de fields para binding
+    public String name;
+    public List<Bind> binding;
 
     public DataDecl(int line, int col, String name, List<Bind> binding) {
         super(line, col);

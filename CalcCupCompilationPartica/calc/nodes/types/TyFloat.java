@@ -1,7 +1,6 @@
 package calc.nodes.types;
 
 
-import calc.nodes.dotutils.DotFile;
 import calc.nodes.environment.Env;
 
 import calc.nodes.CalcVisitor;
