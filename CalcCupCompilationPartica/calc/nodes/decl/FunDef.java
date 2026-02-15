@@ -5,10 +5,10 @@ import calc.nodes.types.CType;
 import java.util.List;
 
 public class FunDef extends CNode {
-    public String name;          // <--- PUBLIC
-    public CType retType;        // <--- PUBLIC
-    public List<Bind> params;    // <--- PUBLIC
-    public CNode body;           // <--- PUBLIC
+    public String name;
+    public CType retType;
+    public List<Bind> params;
+    public CNode body;
 
     public FunDef(int line, int col, String name, List<Bind> params, CType retType, CNode body) {
         super(line, col);

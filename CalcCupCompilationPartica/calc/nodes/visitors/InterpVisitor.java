@@ -22,16 +22,13 @@ public class InterpVisitor extends CalcVisitor {
         this.envStack.push(new Env());
     }
 
-    // --- Helper: Lógica "Truthiness" (C-Style) ---
-    // Resolve o erro do attrAND.lan (10 && 10)
     private boolean isTrue(Object o) {
         if (o instanceof Boolean) return (Boolean) o;
         if (o instanceof Integer) return (Integer) o != 0;
         if (o instanceof Float) return ((Float) o) != 0.0f;
-        return false; // null é falso
+        return false;
     }
 
-    // --- Execução do Programa ---
     public void visit(Program p) {
         for (CNode decl : p.decls) {
             if (decl instanceof FunDef) {
@@ -50,7 +47,6 @@ public class InterpVisitor extends CalcVisitor {
             mainFunc.body.accept(this);
         } else {
             System.err.println("Erro: Função 'main' não encontrada.");
-            // DEBUG: Mostra o que foi encontrado para ajudar no attrSUB.lan
             System.err.println("Ambiente Global contém: " + envStack.peek());
         }
     }
@@ -111,7 +107,6 @@ public class InterpVisitor extends CalcVisitor {
 
     public void visit(If i) {
         i.cond.accept(this);
-        // Usa isTrue() para aceitar Int ou Bool na condição
         if (isTrue(lastValue)) {
             i.thenMsg.accept(this);
         } else if (i.elseMsg != null) {
@@ -142,7 +137,6 @@ public class InterpVisitor extends CalcVisitor {
     }
     
     public void visit(Return r) {}
-    public void visit(Loop l) {}
 
     public void visit(IntLit i) { lastValue = i.value; }
     public void visit(FloatLit f) { lastValue = f.value; }
@@ -217,11 +211,9 @@ public class InterpVisitor extends CalcVisitor {
 
     public void visit(Or e) {
         e.left.accept(this);
-        // Se o primeiro já for verdadeiro, o resultado é TRUE (curto-circuito)
         if (isTrue(lastValue)) {
             lastValue = true;
         } else {
-            // Caso contrário, avalia o segundo
             e.right.accept(this);
             lastValue = isTrue(lastValue);
         }
@@ -229,7 +221,6 @@ public class InterpVisitor extends CalcVisitor {
 
     public void visit(And e) {
         e.left.accept(this);
-        // CORREÇÃO: Usa isTrue() para evitar ClassCastException
         if (!isTrue(lastValue)) {
             lastValue = false;
         } else {

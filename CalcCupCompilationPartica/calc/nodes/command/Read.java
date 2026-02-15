@@ -7,7 +7,6 @@ import calc.nodes.CalcVisitor;
 public class Read extends CNode {
     public Exp lvalue;
 
-    // CORREÇÃO: Adicionado line e col
     public Read(int line, int col, Exp lvalue) {
         super(line, col);
         this.lvalue = lvalue;

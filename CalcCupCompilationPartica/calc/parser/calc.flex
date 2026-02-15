@@ -24,16 +24,10 @@ import java_cup.runtime.Symbol;
        try{ return Float.parseFloat(s); } catch(Exception e){ return 0; }
     }
     private int parseCharLiteral(String text) {
-        // text vem como: 'a' ou '\n'
-        // Remove as aspas simples
         String content = text.substring(1, text.length() - 1);
-        
-        // Se for simples (ex: 'a'), retorna o char
         if (content.length() == 1 && content.charAt(0) != '\\') {
             return content.charAt(0);
         }
-        
-        // Se for escape (ex: \n, \t, \0, \\, \')
         if (content.length() >= 2 && content.charAt(0) == '\\') {
             char code = content.charAt(1);
             switch (code) {
@@ -42,10 +36,10 @@ import java_cup.runtime.Symbol;
                 case 'r': return '\r';
                 case 'b': return '\b';
                 case 'f': return '\f';
-                case '0': return '\0'; // Nulo
+                case '0': return '\0';
                 case '\'': return '\'';
                 case '\\': return '\\';
-                default: return code; // Fallback
+                default: return code;
             }
         }
         return content.charAt(0);
@@ -72,9 +66,9 @@ char_lit     = "'" {char_content} "'"
 %%
 
 <YYINITIAL>{
-    {white}         { /* Ignora */ }
-    {lineComment}   { /* Ignora */ }
-    {blockComment}  { /* Ignora */ }
+    {white}         { }
+    {lineComment}   { }
+    {blockComment}  { }
 
     "data"      { return new Symbol(Lang2ParserSym.DATA, yyline+1, yycolumn+1); }
     "iterate"   { return new Symbol(Lang2ParserSym.ITERATE, yyline+1, yycolumn+1); }
@@ -113,7 +107,6 @@ char_lit     = "'" {char_content} "'"
     "&"         { return new Symbol(Lang2ParserSym.TYPE_AND, yyline+1, yycolumn+1); }
     "!"         { return new Symbol(Lang2ParserSym.NOT, yyline+1, yycolumn+1); }
     "<"         { return new Symbol(Lang2ParserSym.LT, yyline+1, yycolumn+1); }
-    /* CORREÇÃO: GT adicionado */
     ">"         { return new Symbol(Lang2ParserSym.GT, yyline+1, yycolumn+1); }
     "=="        { return new Symbol(Lang2ParserSym.EQ, yyline+1, yycolumn+1); }
     "!="        { return new Symbol(Lang2ParserSym.NEQ, yyline+1, yycolumn+1); }

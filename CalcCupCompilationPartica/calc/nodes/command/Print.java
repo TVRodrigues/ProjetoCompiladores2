@@ -5,7 +5,7 @@ import calc.nodes.expr.Exp;
 import calc.nodes.CalcVisitor;
 
 public class Print extends CNode {
-    public Exp exp; // <--- PUBLIC e nome 'exp'
+    public Exp exp;
 
     public Print(int line, int col, Exp exp) {
         super(line, col);

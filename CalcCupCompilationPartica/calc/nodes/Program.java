@@ -2,7 +2,7 @@ package calc.nodes;
 import java.util.List;
 
 public class Program extends CNode {
-    public List<CNode> decls; // Mudou de List<FunDef> para List<CNode>
+    public List<CNode> decls;
 
     public Program(int line, int col, List<CNode> decls) {
         super(line, col);

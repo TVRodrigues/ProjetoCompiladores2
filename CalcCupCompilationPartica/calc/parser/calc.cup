@@ -26,7 +26,6 @@ parser code {:
 
 scan with {: return s.nextToken(); :};
 
-/* --- TERMINAIS --- */
 terminal DATA, ITERATE, IF, ELSE, RETURN, NEW, PRINT, READ, NULL;
 terminal VOID;
 terminal TYINT, TYCHAR, TYBOOL, TYFLOAT;
@@ -41,7 +40,6 @@ terminal COMMA, SEMI, COLON, DOT, DCOLON, ARROW;
 terminal ASSIGN, AND, OR, TYPE_AND, NOT, LT, GT, EQ, NEQ;
 terminal PLUS, MINUS, TIMES, DIV, MOD;
 
-/* --- NÃO TERMINAIS --- */
 non terminal Program prog;
 non terminal ArrayList<CNode> decl_list;
 non terminal CNode decl;
@@ -60,7 +58,6 @@ non terminal Exp expr, loop_cond;
 non terminal ArrayList<Exp> expr_list_ne;
 non terminal Exp lvalue;
 
-/* --- PRECEDÊNCIA --- */
 precedence left OR;
 precedence left AND;
 precedence nonassoc EQ, NEQ, LT, GT;
@@ -70,13 +67,11 @@ precedence right NOT;
 precedence left DOT, LBRACKET, LPAREN; 
 precedence nonassoc IF, ELSE; 
 
-/* --- GRAMÁTICA --- */
-
 start with prog;
 
 prog ::= decl_list:d
        {: RESULT = new Program(0, 0, d); :}
-       | /* vazio */
+       |
        {: RESULT = new Program(0, 0, new ArrayList<CNode>()); :}
        ;
 
@@ -96,11 +91,10 @@ data_decl ::= DATA TYID:n LBRACE bind_list:b RBRACE
 
 bind_list ::= bind:b bind_list:l
             {: l.add(0, b); RESULT = l; :}
-            | /* vazio */
+            |
             {: RESULT = new ArrayList<Bind>(); :}
             ;
 
-/* CORREÇÃO: Aceitar ':' ou '::' para declarações */
 bind ::= ID:n COLON type:t SEMI
        {: RESULT = new Bind(nleft, nright, t, new Var(nleft, nright, n)); :}
        | ID:n DCOLON type:t SEMI
@@ -120,7 +114,7 @@ func_decl ::= ID:n param_list:p DCOLON type_annot:types block:b
 
 param_list ::= param_list:l ID:n
              {: l.add(n); RESULT = l; :}
-             | /* vazio */
+             |
              {: RESULT = new ArrayList<String>(); :}
              ;
 
@@ -156,7 +150,7 @@ block ::= LBRACE cmd_list:l RBRACE
 
 cmd_list ::= cmd:c cmd_list:l
            {: l.add(0, c); RESULT = l; :}
-           | /* vazio */
+           |
            {: RESULT = new ArrayList<CNode>(); :}
            ;
 
