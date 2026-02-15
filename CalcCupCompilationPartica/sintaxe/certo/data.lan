@@ -4,7 +4,7 @@ data Ponto {
 }
 
 
-f d  :: Int  -> Int & Char {
+fat d  :: Int  -> Int & Char {
     x = 0;
     y =  x + 1 * (5 - 2);
     return 0;
