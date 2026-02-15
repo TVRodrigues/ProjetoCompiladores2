@@ -9,7 +9,6 @@ public class Iterate extends CNode {
     public Exp condition;
     public CNode body;
 
-    // CORREÇÃO: Adicionado line e col
     public Iterate(int line, int col, String varName, Exp condition, CNode body) {
         super(line, col);
         this.varName = varName;

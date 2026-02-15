@@ -3,7 +3,7 @@ import calc.nodes.*;
 import java.util.List;
 
 public class CSeq extends CNode {
-    public List<CNode> cmds; // Mudou de left/right para Lista
+    public List<CNode> cmds;
 
     public CSeq(int line, int col, List<CNode> cmds) {
         super(line, col);

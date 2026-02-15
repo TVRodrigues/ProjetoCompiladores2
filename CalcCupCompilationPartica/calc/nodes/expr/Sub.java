@@ -1,8 +1,6 @@
 package calc.nodes.expr;
 
 
-import calc.nodes.dotutils.DotFile;
-import calc.nodes.environment.Env;
 import calc.nodes.CalcVisitor;
 
 public class Sub extends BinOp {

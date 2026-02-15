@@ -2,8 +2,8 @@ package calc.nodes.expr;
 import calc.nodes.CalcVisitor;
 
 public class FieldAccess extends Exp {
-    public Exp exp;      // A expressão que é a struct (ex: 'p' ou 'vetor[0]')
-    public String field; // O nome do campo (ex: 'x')
+    public Exp exp;
+    public String field;
 
     public FieldAccess(int line, int col, Exp exp, String field) {
         super(line, col);

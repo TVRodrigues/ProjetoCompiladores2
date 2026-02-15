@@ -4,9 +4,9 @@ import calc.nodes.expr.Exp;
 import calc.nodes.CalcVisitor;
 
 public class If extends CNode {
-    public Exp cond;        // <--- PUBLIC
-    public CNode thenMsg;   // <--- PUBLIC (Vou manter esse nome, se o Visitor usa ele)
-    public CNode elseMsg;   // <--- PUBLIC
+    public Exp cond;
+    public CNode thenMsg;
+    public CNode elseMsg;
 
     public If(int line, int col, Exp cond, CNode thenMsg, CNode elseMsg) {
         super(line, col);
