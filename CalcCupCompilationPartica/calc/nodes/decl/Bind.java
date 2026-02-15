@@ -1,7 +1,6 @@
 package calc.nodes.decl;
 
 import calc.nodes.CNode;
-import calc.nodes.environment.Env;
 import calc.nodes.expr.Var;
 import calc.nodes.types.CType;
 import calc.nodes.CalcVisitor;

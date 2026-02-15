@@ -1,7 +1,6 @@
 package calc.nodes.expr;
 
 
-import calc.nodes.environment.Env;
 import calc.nodes.CalcVisitor;
 
 public class Lt extends BinOp {

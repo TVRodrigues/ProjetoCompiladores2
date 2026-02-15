@@ -1,4 +1,4 @@
-import java.io.*;
+import java.io.FileReader;
 import calc.parser.CalcLexer;
 import calc.parser.Lang2Parser;
 import calc.nodes.Program; 
@@ -30,14 +30,14 @@ public class Lang2Compiler {
              fileName = args[0];
         }
 
-        try {
-            CalcLexer lexer = new CalcLexer(new FileReader(fileName));
+        try (FileReader reader = new FileReader(fileName)) {
+            CalcLexer lexer = new CalcLexer(reader);
             Lang2Parser parser = new Lang2Parser(lexer);
 
             if (mode.equals("-syn")) {
                 parser.parse();
                 System.out.println("accepted");
-            } 
+            }
             else if (mode.equals("-i")) {
                 Symbol s = parser.parse();
                 Program prog = (Program) s.value;
@@ -50,6 +50,12 @@ public class Lang2Compiler {
                 parser.parse();
             }
         } catch (Exception e) {
+            if (mode.equals("-syn")) {
+                System.out.println("rejected");
+            } else {
+                e.printStackTrace();
+            }
+        } catch (Error e) {
             if (mode.equals("-syn")) {
                 System.out.println("rejected");
             } else {

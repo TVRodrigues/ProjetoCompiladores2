@@ -1,10 +1,5 @@
 package calc.nodes;
 
-
-import calc.nodes.environment.Env;
-import calc.parser.Lang2ParserSym;
-
-
 public abstract class CNode{
      private int l,c;
 
