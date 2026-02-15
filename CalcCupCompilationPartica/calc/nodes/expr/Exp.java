@@ -1,8 +1,5 @@
 package calc.nodes.expr;
 
-
-import calc.nodes.CalcVisitor;
-
 import calc.nodes.CNode;
 
 public abstract class Exp extends CNode {

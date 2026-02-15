@@ -1,5 +1,4 @@
 package calc.nodes.expr;
-import calc.nodes.CalcVisitor;
 
 public abstract class BinOp extends Exp {
     public Exp left;
